@@ -44,11 +44,10 @@
     <ul class="nav-links" id="navLinks">
       <li><a href="index.html">Home</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="team.html">Team</a></li>
       <li><a href="services.html">Services</a></li>
-      <li><a href="careers.html">Careers</a></li>
-      <li><a href="contact.html" class="active">Contact</a></li>
+      <li><a href="team.html">Team</a></li>
       <li><a href="pay.html">Pay Invoice</a></li>
+      <li><a href="contact.html" class="active">Contact</a></li>
       <li><a href="contact.html" class="btn btn-gold">Get a Quote</a></li>
     </ul>
     <div class="nav-cta">
@@ -98,7 +97,7 @@
         </p>
       </div>
       <div class="mapwrap">
-        <iframe title="King EPCM location" loading="lazy" src="https://www.google.com/maps?q=3780%2014th%20Avenue%20Markham%20ON%20L3R%209Y5&output=embed"></iframe>
+        <iframe title="King EPCM location" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2701.707145298833!2d-79.33020692419844!3d43.838745840411136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d52562899fd309%3A0xae904ff557b052d0!2sKing%20EPCM!5e1!3m2!1sen!2sca!4v1781894398597!5m2!1sen!2sca" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </div>
 
@@ -108,7 +107,7 @@
       <p class="lead" style="font-size:1rem;margin-bottom:20px">Tell us about your project and we'll get back to you promptly.</p>
       <!-- NOTE: connect this form to a handler before going live (see DEPLOY_GUIDE).
            Replace action with your Formspree endpoint or an Azure Function URL. -->
-      <form action="https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID" method="POST">
+      <form action="https://formspree.io/f/xdavqzqb" method="POST" enctype="multipart/form-data">
         <div class="field">
           <label for="name">Name *</label>
           <input id="name" name="name" required>
@@ -148,6 +147,11 @@
         <div class="field">
           <label for="message">Project details *</label>
           <textarea id="message" name="message" required></textarea>
+        </div>
+        <div class="field">
+          <label for="upload">Attach documents (optional)</label>
+          <input id="upload" name="upload" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip">
+          <p class="form-note" style="margin-top:6px">Site plans, drawings, or reference documents — PDF, Word, Excel, images, or ZIP. If your file is too large to upload, please email it to <a href="mailto:sales@kingepcm.com">sales@KingEPCM.com</a>.</p>
         </div>
         <button type="submit" class="btn btn-gold">Send Request</button>
         <p class="form-note">Prefer email? Write to <a href="mailto:sales@kingepcm.com">sales@KingEPCM.com</a> for quotes, or call 416-342-3001.</p>
