@@ -127,6 +127,8 @@ a.card{display:block;color:inherit;text-decoration:none}
 .svc:last-child{border-bottom:0}
 .svc.rev .svc-media{order:2}
 .svc-media{background:linear-gradient(135deg,var(--navy),var(--navy-light));border-radius:var(--radius);min-height:240px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:.9rem}
+.svc-media.has-img{padding:0;display:block;min-height:0;background:none}
+.svc-media.has-img img{width:100%;height:320px;object-fit:cover;border-radius:var(--radius);display:block}
 .svc ul{margin:14px 0 0 18px;color:var(--muted)}
 .svc ul li{margin-bottom:6px}
 
@@ -146,7 +148,7 @@ a.card{display:block;color:inherit;text-decoration:none}
 .svc-list summary:hover{background:var(--bg)}
 .svc-list .body{padding:4px 22px 20px;border-top:1px solid var(--line)}
 .svc-list ul{margin:12px 0 0 18px;color:var(--muted);columns:2;column-gap:38px}
-.svc-list ul li{margin-bottom:9px;break-inside:avoid;color:#263142;font-weight:400;font-size:.9rem;line-height:1.42}
+.svc-list ul li{margin-bottom:9px;break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;color:#263142;font-weight:400;font-size:.9rem;line-height:1.42}
 .svc-list .svc-main{display:block;font-weight:500;color:#14294D}
 .svc-list .svc-variation{display:block;margin-top:2px;color:#707784;font-size:.78rem;font-weight:400;line-height:1.32;font-style:normal;padding-left:1px}
 .svc-list h4{margin:16px 0 4px;color:var(--navy);font-family:'Inter',sans-serif;font-size:.92rem}
@@ -214,6 +216,8 @@ form textarea{min-height:120px;resize:vertical}
   .nav-links .dropdown a:hover{background:transparent;color:var(--gold-dark)}
   .nav-mobile-quote{display:inline-flex;align-items:center;padding:8px 13px;font-size:.82rem;border-radius:6px;white-space:nowrap}
   .hamburger{display:block;z-index:60}
+  .nav-links .dropdown{position:static;display:block;box-shadow:none;border:none;background:transparent;padding:2px 0 2px 12px;min-width:0}
+  .nav-links .dropdown a{padding:6px 0;font-size:.9rem;color:var(--muted)}
   .nav-cta{gap:10px}
   .nav-cta .nav-phone{display:none}
 }
