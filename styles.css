@@ -59,6 +59,13 @@ img{max-width:100%;display:block}
 .nav-links .btn{padding:8px 16px;font-size:.86rem;border-radius:6px}
 .nav-links .btn-gold,.nav-links .btn-gold:hover{color:var(--navy-dark)}
 .nav-links .btn-gold:hover{background:var(--gold-dark);color:#fff}
+.nav-links .has-dropdown{position:relative}
+.nav-links .caret{font-size:.7em;opacity:.75}
+.nav-links .dropdown{position:absolute;top:100%;left:0;margin:0;padding:8px 0;list-style:none;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 30px rgba(20,41,77,.14);min-width:255px;display:none;z-index:60}
+.nav-links .has-dropdown:hover .dropdown,.nav-links .has-dropdown:focus-within .dropdown{display:block}
+.nav-links .dropdown li{margin:0}
+.nav-links .dropdown a{display:block;padding:9px 18px;font-size:.92rem;color:var(--ink);white-space:nowrap}
+.nav-links .dropdown a:hover{background:var(--bg);color:var(--gold-dark)}
 .nav-cta{display:flex;align-items:center;gap:16px}
 .nav-phone{display:none}
 .hamburger{display:none;background:none;border:0;cursor:pointer;font-size:1.6rem;color:var(--navy)}
@@ -99,6 +106,13 @@ a.card{display:block;color:inherit;text-decoration:none}
 .markets{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .market{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 22px;display:flex;align-items:center;gap:14px;font-weight:600;color:var(--navy)}
 .market .dot{width:10px;height:10px;border-radius:50%;background:var(--gold);flex:none}
+.markets-layout{display:block}
+.markets-layout .markets{grid-template-columns:repeat(3,1fr)}
+.project-map{margin:26px 0 0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 14px 36px rgba(20,41,77,.10)}
+.project-map img{display:block;width:100%;max-height:520px;object-fit:cover}
+.project-map figcaption{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 18px;border-top:1px solid var(--line);font-size:.9rem;color:var(--muted)}
+.project-map figcaption strong{color:var(--navy)}
+.project-map figcaption span{text-align:right}
 
 /* why */
 .why{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
@@ -180,17 +194,35 @@ form textarea{min-height:120px;resize:vertical}
   .grid-2,.grid-3,.why,.stats,.markets,.contact-grid,.footer-grid{grid-template-columns:1fr}
   .stats{grid-template-columns:repeat(2,1fr)}
   .markets{grid-template-columns:repeat(2,1fr)}
+  .markets-layout .markets{grid-template-columns:repeat(2,1fr)}
+  .project-map img{max-height:430px}
   .svc,.svc.rev{grid-template-columns:1fr}
   .svc .svc-media,.svc.rev .svc-media{order:2}
   .depts{grid-template-columns:1fr}
   .nav-links{position:fixed;inset:0 0 0 auto;width:min(78vw,320px);background:#fff;flex-direction:column;align-items:flex-start;padding:90px 28px;gap:18px;transform:translateX(100%);transition:.25s;box-shadow:-10px 0 30px rgba(0,0,0,.12)}
   .nav-links.open{transform:translateX(0)}
+  .nav-links .has-dropdown{width:100%}
+  .nav-links .has-dropdown > a{display:flex;align-items:center;gap:6px}
+  .nav-links .dropdown{position:static;display:block;min-width:0;width:100%;margin-top:8px;padding:6px 0 0 12px;border:0;box-shadow:none;background:transparent}
+  .nav-links .dropdown a{padding:7px 0;font-size:.88rem;color:var(--muted);white-space:normal}
+  .nav-links .dropdown a:hover{background:transparent;color:var(--gold-dark)}
   .hamburger{display:block;z-index:60}
   .nav-cta .nav-phone{display:none}
 }
-@media(max-width:520px){.stats,.markets{grid-template-columns:1fr}.topbar{display:none}}
+@media(max-width:520px){.stats,.markets{grid-template-columns:1fr}.markets-layout .markets{grid-template-columns:1fr}.project-map figcaption{display:block}.project-map figcaption span{display:block;text-align:left;margin-top:3px}.topbar{display:none}}
 
 /* team */
+
+/* compact team page rhythm */
+.team-page .page-hero{padding:48px 0}
+.team-page .section{padding:46px 0}
+.team-page .team-cat{margin:0 0 18px}
+.team-page .team-grid{gap:22px}
+.team-page .person .nm{margin-top:9px}
+.team-page .gratitude{margin:26px auto 0}
+.team-page .cta-band{padding:36px 0}
+@media(max-width:900px){.team-page .section{padding:38px 0}.team-page .page-hero{padding:42px 0}.team-page .team-cat{margin-bottom:16px}}
+
 .team-cat{margin:50px 0 24px;font-family:'Poppins',serif;font-size:1.4rem;color:var(--navy);border-left:4px solid var(--gold);padding-left:14px}
 .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:26px}
 .person{text-align:center}
