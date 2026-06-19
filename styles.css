@@ -60,7 +60,7 @@ img{max-width:100%;display:block}
 .nav-links .btn-gold,.nav-links .btn-gold:hover{color:var(--navy-dark)}
 .nav-links .btn-gold:hover{background:var(--gold-dark);color:#fff}
 .nav-cta{display:flex;align-items:center;gap:16px}
-.nav-phone{font-weight:700;color:var(--navy)}
+.nav-phone{display:none}
 .hamburger{display:none;background:none;border:0;cursor:pointer;font-size:1.6rem;color:var(--navy)}
 
 /* hero */
@@ -91,7 +91,8 @@ img{max-width:100%;display:block}
 .card .ic svg{width:26px;height:26px;stroke:var(--gold-dark)}
 .card h3{margin-bottom:8px}
 .card p{color:var(--muted);font-size:.96rem;margin-bottom:0}
-.card a.more{display:inline-block;margin-top:14px;color:var(--gold-dark);font-weight:600;font-size:.92rem}
+.card .more{display:inline-block;margin-top:14px;color:var(--gold-dark);font-weight:600;font-size:.92rem}
+a.card{display:block;color:inherit;text-decoration:none}
 
 /* markets */
 .markets{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
@@ -111,8 +112,15 @@ img{max-width:100%;display:block}
 .svc ul{margin:14px 0 0 18px;color:var(--muted)}
 .svc ul li{margin-bottom:6px}
 
+/* service highlights */
+.highlights{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:28px}
+.highlight{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:20px 22px}
+.highlight h3{font-size:1.08rem;margin-bottom:7px}
+.highlight p{color:var(--muted);font-size:.95rem;margin-bottom:0}
+@media(max-width:760px){.highlights{grid-template-columns:1fr}}
+
 /* CTA band */
-.cta-band{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%);color:var(--navy-dark);text-align:center}
+.cta-band{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%);color:var(--navy-dark);text-align:center;padding:44px 0}
 .cta-band h2{color:var(--navy-dark)}
 .cta-band p{color:#5b4a18;max-width:640px;margin-left:auto;margin-right:auto}
 .cta-band .btn-navy{margin-top:10px}
