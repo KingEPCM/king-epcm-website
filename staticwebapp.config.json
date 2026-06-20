@@ -1,13 +1,49 @@
 {
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/assets/*", "*.css", "*.js", "*.png", "*.jpg", "*.ico"]
-  },
   "routes": [
-    { "route": "/", "rewrite": "/index.html" }
+    { "route": "/index.html", "redirect": "/", "statusCode": 301 },
+    { "route": "/", "rewrite": "/index.html" },
+
+    { "route": "/about.html", "redirect": "/about", "statusCode": 301 },
+    { "route": "/about", "rewrite": "/about.html" },
+
+    { "route": "/services.html", "redirect": "/services", "statusCode": 301 },
+    { "route": "/services", "rewrite": "/services.html" },
+
+    { "route": "/team.html", "redirect": "/team", "statusCode": 301 },
+    { "route": "/team", "rewrite": "/team.html" },
+
+    { "route": "/careers.html", "redirect": "/careers", "statusCode": 301 },
+    { "route": "/careers", "rewrite": "/careers.html" },
+
+    { "route": "/contact.html", "redirect": "/contact", "statusCode": 301 },
+    { "route": "/contact", "rewrite": "/contact.html" },
+
+    { "route": "/pay.html", "redirect": "/pay", "statusCode": 301 },
+    { "route": "/pay", "rewrite": "/pay.html" },
+
+    { "route": "/chemical-environmental.html", "redirect": "/chemical-environmental", "statusCode": 301 },
+    { "route": "/chemical-environmental", "rewrite": "/chemical-environmental.html" },
+
+    { "route": "/natural-heritage-environmental.html", "redirect": "/natural-heritage-environmental", "statusCode": 301 },
+    { "route": "/natural-heritage-environmental", "rewrite": "/natural-heritage-environmental.html" },
+
+    { "route": "/civil-municipal-design.html", "redirect": "/civil-municipal-design", "statusCode": 301 },
+    { "route": "/civil-municipal-design", "rewrite": "/civil-municipal-design.html" },
+
+    { "route": "/survey-inspections.html", "redirect": "/survey-inspections", "statusCode": 301 },
+    { "route": "/survey-inspections", "rewrite": "/survey-inspections.html" },
+
+    { "route": "/geotechnical-hydrogeology.html", "redirect": "/geotechnical-hydrogeology", "statusCode": 301 },
+    { "route": "/geotechnical-hydrogeology", "rewrite": "/geotechnical-hydrogeology.html" },
+
+    { "route": "/permit-project-management.html", "redirect": "/permit-project-management", "statusCode": 301 },
+    { "route": "/permit-project-management", "rewrite": "/permit-project-management.html" },
+
+    { "route": "/mining-aggregate.html", "redirect": "/mining-aggregate", "statusCode": 301 },
+    { "route": "/mining-aggregate", "rewrite": "/mining-aggregate.html" }
   ],
   "responseOverrides": {
-    "404": { "rewrite": "/index.html" }
+    "404": { "rewrite": "/index.html", "statusCode": 404 }
   },
   "mimeTypes": {
     ".json": "application/json"
