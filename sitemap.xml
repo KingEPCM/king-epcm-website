@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://www.kingepcm.com/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://www.kingepcm.com/services.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://www.kingepcm.com/chemical-environmental.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.kingepcm.com/natural-heritage-environmental.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.kingepcm.com/civil-municipal-design.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.kingepcm.com/survey-inspections.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.kingepcm.com/geotechnical-hydrogeology.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.kingepcm.com/permit-project-management.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.kingepcm.com/mining-aggregate.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.kingepcm.com/about.html</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.kingepcm.com/team.html</loc><changefreq>yearly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://www.kingepcm.com/careers.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://www.kingepcm.com/contact.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kingepcm.com/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://kingepcm.com/services.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://kingepcm.com/chemical-environmental.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kingepcm.com/natural-heritage-environmental.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kingepcm.com/civil-municipal-design.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kingepcm.com/survey-inspections.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kingepcm.com/geotechnical-hydrogeology.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kingepcm.com/permit-project-management.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kingepcm.com/mining-aggregate.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://kingepcm.com/about.html</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://kingepcm.com/team.html</loc><changefreq>yearly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://kingepcm.com/careers.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://kingepcm.com/contact.html</loc><changefreq>yearly</changefreq><priority>0.8</priority></url>
 </urlset>

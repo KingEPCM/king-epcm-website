@@ -11,18 +11,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260619j">
-<link rel="canonical" href="https://www.kingepcm.com/about.html">
+<link rel="stylesheet" href="styles.css?v=20260620a">
+<link rel="canonical" href="https://kingepcm.com/about.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="King EPCM">
 <meta property="og:title" content="About | King EPCM">
 <meta property="og:description" content="King EPCM was established in 2019 to provide flexible, dependable, on-site civil, environmental, and geotechnical engineering for land development across Ontario.">
-<meta property="og:url" content="https://www.kingepcm.com/about.html">
-<meta property="og:image" content="https://www.kingepcm.com/assets/og-image.jpg">
+<meta property="og:url" content="https://kingepcm.com/about.html">
+<meta property="og:image" content="https://kingepcm.com/assets/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="About | King EPCM">
 <meta name="twitter:description" content="Flexible, dependable, on-site engineering for land development across Ontario since 2019.">
-<meta name="twitter:image" content="https://www.kingepcm.com/assets/og-image.jpg">
+<meta name="twitter:image" content="https://kingepcm.com/assets/og-image.jpg">
 
 <!--[if gte mso 9]><xml>
 <mso:CustomDocumentProperties>
@@ -61,6 +61,7 @@
       <li><a href="pay.html">Pay Invoice</a></li>
       <li><a href="contact.html">Contact</a></li>
       <li><a href="contact.html#quote" class="btn btn-gold">Get a Quote</a></li>
+      <li class="nav-search"><button type="button" id="searchToggle" class="search-toggle" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button></li>
     </ul>
     <div class="nav-cta">
       <a href="tel:+14163423001" class="nav-phone">416-342-3001</a>
@@ -69,6 +70,15 @@
     </div>
   </nav>
 </header>
+
+<div class="search-modal" id="searchModal" role="dialog" aria-modal="true" aria-label="Site search">
+  <div class="search-box">
+    <input type="search" id="searchInput" placeholder="Search services and pages…" autocomplete="off" aria-label="Search the site">
+    <button type="button" class="search-close" id="searchClose" aria-label="Close search">✕</button>
+    <ul class="search-results" id="searchResults"></ul>
+  </div>
+</div>
+
 
 <section class="page-hero">
   <div class="container">
@@ -162,6 +172,7 @@
   </div>
 </footer>
 
+<script src="search.js"></script>
 <script>
   const h=document.getElementById('hamburger'),n=document.getElementById('navLinks');
   h&&h.addEventListener('click',()=>n.classList.toggle('open'));

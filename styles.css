@@ -246,3 +246,23 @@ form textarea{min-height:120px;resize:vertical}
 .gratitude{max-width:780px;margin:40px auto 0;text-align:center;color:var(--muted);font-style:italic}
 @media(max-width:900px){.team-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.team-grid,.team-lead{grid-template-columns:repeat(2,1fr)}}
+
+/* ===== Site search ===== */
+.nav-links li.nav-search{display:flex;align-items:center}
+.search-toggle{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;background:none;border:0;cursor:pointer;color:var(--navy);border-radius:8px}
+.search-toggle:hover{background:var(--bg);color:var(--gold-dark)}
+.search-toggle svg{width:20px;height:20px;display:block}
+.search-modal{position:fixed;inset:0;background:rgba(20,41,77,.45);display:none;z-index:200;padding:0 16px}
+.search-modal.open{display:block}
+.search-box{max-width:640px;margin:84px auto 0;background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(20,41,77,.3);padding:14px;position:relative}
+.search-box input[type=search]{width:100%;font-size:1.05rem;padding:14px 44px 14px 16px;border:1px solid var(--line);border-radius:10px;outline:none;font-family:inherit;color:var(--ink);-webkit-appearance:none}
+.search-box input[type=search]:focus{border-color:var(--gold)}
+.search-close{position:absolute;top:25px;right:27px;background:none;border:0;font-size:1.05rem;color:var(--muted);cursor:pointer;line-height:1}
+.search-results{list-style:none;margin:10px 0 4px;padding:0;max-height:60vh;overflow:auto}
+.search-results li{margin:0}
+.search-results a{display:block;padding:11px 14px;border-radius:9px;color:var(--ink);text-decoration:none}
+.search-results a:hover,.search-results a.sel{background:var(--bg)}
+.search-results .r-title{display:block;font-weight:600;color:var(--navy);font-size:.98rem}
+.search-results .r-desc{display:block;font-size:.84rem;color:var(--muted);margin-top:2px;line-height:1.35}
+.search-empty{padding:14px;color:var(--muted);font-size:.92rem}
+@media(max-width:900px){.search-box{margin-top:70px}.nav-links li.nav-search .search-toggle{width:auto;height:auto;padding:6px 0;gap:8px}.nav-links li.nav-search .search-toggle::after{content:"Search";font-weight:500;font-size:.98rem}}
