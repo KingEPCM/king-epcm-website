@@ -40,7 +40,10 @@
     { "route": "/permit-project-management", "rewrite": "/permit-project-management.html" },
 
     { "route": "/mining-aggregate.html", "redirect": "/mining-aggregate", "statusCode": 301 },
-    { "route": "/mining-aggregate", "rewrite": "/mining-aggregate.html" }
+    { "route": "/mining-aggregate", "rewrite": "/mining-aggregate.html" },
+
+    { "route": "/project-onboarding.html", "redirect": "/project-onboarding", "statusCode": 301 },
+    { "route": "/project-onboarding", "rewrite": "/project-onboarding.html" }
   ],
   "responseOverrides": {
     "404": { "rewrite": "/index.html", "statusCode": 404 }

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Onboarding Form | King EPCM — Markham, ON</title>
+<meta name="description" content="Share your project details with King EPCM so our team can provide timely, efficient support. Owner, billing, and project contact information for new engagements.">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="assets/favicon-512.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20260620a">
+<link rel="canonical" href="https://kingepcm.com/project-onboarding">
+
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:_ApprovalStatus msdt:dt="string">0</mso:_ApprovalStatus>
+<mso:_ApprovalAssignedTo msdt:dt="string"></mso:_ApprovalAssignedTo>
+<mso:_ApprovalRespondedBy msdt:dt="string"></mso:_ApprovalRespondedBy>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="topbar"><div class="container">
+    <a href="tel:+14163423001">📞 416-342-3001</a>
+    <a href="mailto:info@kingepcm.com">✉️ info@KingEPCM.com</a>
+    <span>3780 14th Ave, Unit 211, Markham, ON</span>
+  </div></div>
+  <nav class="navbar">
+    <a href="/" class="logo"><img src="assets/logo-header.png" alt="King EPCM"></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li class="has-dropdown"><a href="/services">Services <span class="caret">▾</span></a>
+      <ul class="dropdown">
+        <li><a href="/chemical-environmental">Chemical Environmental</a></li>
+        <li><a href="/civil-municipal-design">Civil &amp; Municipal Design</a></li>
+        <li><a href="/geotechnical-hydrogeology">Geotechnical &amp; Hydrogeology</a></li>
+        <li><a href="/survey-inspections">Survey &amp; Inspections</a></li>
+        <li><a href="/natural-heritage-environmental">Natural Heritage Environmental</a></li>
+        <li><a href="/permit-project-management">Permit &amp; Project Management</a></li>
+        <li><a href="/mining-aggregate">Mining &amp; Aggregate</a></li>
+      </ul>
+      </li>
+      <li><a href="/team">Team</a></li>
+      <li><a href="/pay">Pay Invoice</a></li>
+      <li><a href="/contact">Contact</a></li>
+      <li><a href="/contact#quote" class="btn btn-gold">Get a Quote</a></li>
+      <li class="nav-search"><button type="button" id="searchToggle" class="search-toggle" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="tel:+14163423001" class="nav-phone">416-342-3001</a>
+      <a href="/contact#quote" class="btn btn-gold nav-mobile-quote">Get a Quote</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+    </div>
+  </nav>
+</header>
+
+<div class="search-modal" id="searchModal" role="dialog" aria-modal="true" aria-label="Site search">
+  <div class="search-box">
+    <input type="search" id="searchInput" placeholder="Search services and pages…" autocomplete="off" aria-label="Search the site">
+    <button type="button" class="search-close" id="searchClose" aria-label="Close search">✕</button>
+    <ul class="search-results" id="searchResults"></ul>
+  </div>
+</div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a> / Project Onboarding</div>
+    <h1>Project Onboarding Form</h1>
+    <p>Thank you for choosing King EPCM. Enter as much project information as you can so we can provide timely and efficient support. Fields marked <strong>*</strong> are required.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width:820px">
+
+    <form id="onboardForm" novalidate>
+      <!-- Anti-spam honeypot: real people leave this empty; it's hidden from view. -->
+      <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden">
+        <label>Company website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      </div>
+
+      <div class="field">
+        <label for="owner">1. Legal Owner Name *</label>
+        <p class="form-note" style="margin:0 0 6px">Please enter the legal owner's name that should appear on all drawings and reports.</p>
+        <input id="owner" name="Legal Owner Name" data-required autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="address">2. Project Address *</label>
+        <p class="form-note" style="margin:0 0 6px">Please provide the municipal address of the project site, or if not available, the approximate Lat/Long coordinates from Google Maps.</p>
+        <textarea id="address" name="Project Address" data-required rows="2"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="billName">3. Billing Contact Name *</label>
+        <p class="form-note" style="margin:0 0 6px">Please provide the name of the person to contact for invoices and billing information.</p>
+        <input id="billName" name="Billing Contact Name" data-required autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="billAddress">4. Billing Mailing Address *</label>
+        <p class="form-note" style="margin:0 0 6px">Please provide your legal business (or personal) mailing address.</p>
+        <textarea id="billAddress" name="Billing Mailing Address" data-required rows="2"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="billPhone">5. Billing Contact Phone # *</label>
+        <p class="form-note" style="margin:0 0 6px">Please provide your primary and secondary phone numbers.</p>
+        <input id="billPhone" name="Billing Contact Phone" data-required autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="billEmail">6. Billing Contact Email Address *</label>
+        <p class="form-note" style="margin:0 0 6px">Please also include any contact to cc on billing emails.</p>
+        <textarea id="billEmail" name="Billing Contact Email" data-required rows="2"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="authRep">7. Primary Authorized Representative</label>
+        <p class="form-note" style="margin:0 0 6px">Person authorized to act on behalf of the legal owner. This person is contacted for all key/critical decisions and report deliverables, including billing &amp; invoicing concerns. Please include: name, phone number, email address, and — if different — the company name and company mailing address.</p>
+        <textarea id="authRep" name="Primary Authorized Representative" rows="3"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="pm">8. Primary Project Manager</label>
+        <p class="form-note" style="margin:0 0 6px">If different from the Primary Authorized Representative, the person acting on behalf of the entirety of the project. This person is contacted for key/critical decisions and report deliverables, but not invoicing concerns unless otherwise stated. Please include: name, phone number, email address, and — if different — the company name and company mailing address.</p>
+        <textarea id="pm" name="Primary Project Manager" rows="3"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="siteContact">9. Primary Site Contact</label>
+        <p class="form-note" style="margin:0 0 6px">To coordinate site visits, please include the name, phone number, and email address of the site contact.</p>
+        <textarea id="siteContact" name="Primary Site Contact" rows="2"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="team">10. Project team members (if known)</label>
+        <p class="form-note" style="margin:0 0 6px">Any other consultants/contacts we should cc on emails. Anyone not on this list will not have access to our reports and deliverables.</p>
+        <textarea id="team" name="Project Team Members" rows="3"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-gold" id="onboardSubmit">Submit Project Information</button>
+      <p class="form-note" id="onboardStatus" role="status" style="margin-top:12px"></p>
+      <p class="form-note">Prefer email? Send your details to <a href="mailto:sales@kingepcm.com">sales@KingEPCM.com</a>, or call 416-342-3001.</p>
+    </form>
+
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <span class="footer-logo"><img loading="lazy" src="assets/logo-white.png" alt="King EPCM"></span>
+        <p>Flexible, dependable, on-site engineering for land development across Ontario.</p>
+      </div>
+      <div><h4>Company</h4><ul>
+        <li><a href="/about">About King EPCM</a></li>
+        <li><a href="/services">Our Services</a></li>
+        <li><a href="/pay">Pay Invoice / Retainer</a></li>
+        <li><a href="/careers">Careers</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul></div>
+      <div><h4>Services</h4><ul>
+        <li><a href="/chemical-environmental">Chemical Environmental</a></li>
+        <li><a href="/civil-municipal-design">Civil &amp; Municipal Design</a></li>
+        <li><a href="/geotechnical-hydrogeology">Geotechnical &amp; Hydrogeology</a></li>
+        <li><a href="/survey-inspections">Survey &amp; Inspections</a></li>
+        <li><a href="/natural-heritage-environmental">Natural Heritage Environmental</a></li>
+        <li><a href="/permit-project-management">Permit &amp; Project Management</a></li>
+        <li><a href="/mining-aggregate">Mining &amp; Aggregate</a></li>
+      </ul></div>
+      <div><h4>Get in touch</h4><ul>
+        <li>3780 14th Avenue, Unit 211<br>Markham, ON L3R 9Y5</li>
+        <li><a href="tel:+14163423001">+1 (416) 342-3001</a></li>
+        <li><a href="mailto:info@kingepcm.com">info@KingEPCM.com</a></li>
+      </ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 King EPCM. All rights reserved.</span><span><a href="https://intranet.kingepcm.com" style="color:inherit;text-decoration:underline">Staff Login</a> &nbsp;·&nbsp; Markham, Ontario, Canada</span></div>
+  </div>
+</footer>
+
+<script src="search.js"></script>
+<script>
+  const h=document.getElementById('hamburger'),n=document.getElementById('navLinks');
+  h&&h.addEventListener('click',()=>n.classList.toggle('open'));
+
+  (function(){
+    var form=document.getElementById('onboardForm');
+    var btn=document.getElementById('onboardSubmit');
+    var status=document.getElementById('onboardStatus');
+    if(!form) return;
+    form.addEventListener('submit',function(e){
+      e.preventDefault();
+      // Collect every named field into a label/value list.
+      var fields=[];
+      form.querySelectorAll('input[name], textarea[name]').forEach(function(el){
+        if(el.name==='website') return; // honeypot
+        fields.push({label:el.name, value:(el.value||'').trim()});
+      });
+      var filled=fields.filter(function(f){return f.value;});
+      if(!filled.length){ status.style.color='#C0392B'; status.textContent='Please fill in at least one field before submitting.'; return; }
+      // Required fields (1–6): block until all are filled, highlight the first missing one.
+      var firstMissing=null;
+      form.querySelectorAll('[data-required]').forEach(function(el){
+        var empty=!(el.value||'').trim();
+        el.style.borderColor=empty?'#C0392B':'';
+        if(empty && !firstMissing) firstMissing=el;
+      });
+      if(firstMissing){ status.style.color='#C0392B'; status.textContent='Please complete all required fields (marked *) before submitting.'; firstMissing.focus(); return; }
+      var payload={ website:(form.querySelector('[name=website]')||{}).value||'', fields:fields };
+      btn.disabled=true; status.style.color=''; status.textContent='Sending…';
+      fetch('/api/onboarding-submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+        .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+        .then(function(res){
+          if(res.ok && res.j && res.j.ok){
+            form.reset();
+            status.style.color='#1c7a3f';
+            status.textContent='Thank you — your project information has been sent to our team. We\'ll be in touch shortly.';
+            btn.textContent='Submitted';
+          } else { throw new Error('bad'); }
+        })
+        .catch(function(){
+          btn.disabled=false;
+          status.style.color='#C0392B';
+          status.innerHTML='Sorry, something went wrong sending the form. Please email your details to <a href="mailto:sales@kingepcm.com">sales@KingEPCM.com</a> or call 416-342-3001.';
+        });
+    });
+  })();
+</script>
+</body>
+</html>
