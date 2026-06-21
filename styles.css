@@ -104,6 +104,9 @@ img{max-width:100%;display:block}
 a.card{display:block;color:inherit;text-decoration:none}
 
 .home-services-grid{align-items:stretch}
+/* Make the whole service card clickable — the "Learn more" link covers the card */
+.home-services-grid .card{position:relative;cursor:pointer}
+.home-services-grid .card .more::after{content:"";position:absolute;inset:0;z-index:1}
 
 /* markets */
 .markets{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
