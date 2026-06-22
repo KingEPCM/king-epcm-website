@@ -138,7 +138,11 @@ async function sendMail(token, from, to, subject, html, pdf, filename) {
 }
 
 /* ---------- Teamwork (Projects API v1) ---------- */
-function twBase() { return "https://" + TW_DOMAIN + ".teamwork.com"; }
+function twBase() {
+  // Accept "kingepcm", "kingepcm.teamwork.com", or a full URL — normalize to the host.
+  var d = String(TW_DOMAIN || "").trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "").replace(/\.teamwork\.com$/i, "");
+  return "https://" + d + ".teamwork.com";
+}
 function twAuth() { return "Basic " + Buffer.from(TW_KEY + ":x").toString("base64"); }
 async function twProjects() {
   const r = await fetch(twBase() + "/projects.json?pageSize=500&status=ACTIVE", { headers: { Authorization: twAuth() } });
