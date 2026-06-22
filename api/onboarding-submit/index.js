@@ -21,8 +21,6 @@
  *   TEAMWORK_API_KEY                   Teamwork API token
  *   TEAMWORK_INTAKE_PROJECT_ID         fallback project id when no address match is found
  */
-const PDFDocument = require("pdfkit");
-
 const TENANT = process.env.GRAPH_TENANT || "52e591ce-74f5-4c10-9dc3-b1020c47dc24";
 const CLIENT_ID = process.env.AAD_CLIENT_ID;
 const CLIENT_SECRET = process.env.AAD_CLIENT_SECRET;
@@ -33,6 +31,7 @@ const TW_KEY = process.env.TEAMWORK_API_KEY || "";
 const TW_INTAKE = process.env.TEAMWORK_INTAKE_PROJECT_ID || "";
 
 module.exports = async function (context, req) {
+ try {
   const body = req.body || {};
 
   // Anti-spam: silently accept honeypot hits without doing anything.
@@ -87,12 +86,17 @@ module.exports = async function (context, req) {
   // Success for the client as long as we captured it somewhere (email or Teamwork).
   status.ok = status.emailed || status.postedToTeamwork;
   context.res = json(status.ok ? 200 : 502, status);
+ } catch (e) {
+  context.log.error(e);
+  context.res = json(500, { ok: false, error: String((e && e.message) || e) });
+ }
 };
 
 /* ---------- PDF ---------- */
 function buildPdf(fields, owner, address) {
   return new Promise(function (resolve, reject) {
     try {
+      const PDFDocument = require("pdfkit"); // lazy: a missing lib disables the PDF, not the endpoint
       const doc = new PDFDocument({ size: "A4", margin: 50 });
       const chunks = [];
       doc.on("data", function (d) { chunks.push(d); });
