@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "description": "Azure Functions for the King EPCM public site (project onboarding form).",
   "main": "index.js",
-  "engines": { "node": ">=18" }
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "pdfkit": "^0.15.0"
+  }
 }
