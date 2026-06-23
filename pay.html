@@ -102,14 +102,8 @@
     <p class="lead" style="font-size:1rem;margin-bottom:12px">Enter your project information below, then continue to our secure Clover payment page to complete payment.</p>
     <p style="background:rgba(229,168,35,.15);border-left:4px solid var(--gold);padding:11px 15px;border-radius:6px;font-weight:600;color:var(--navy-dark);margin-bottom:22px">💳 We accept Visa &amp; Mastercard only.<br><span style="font-weight:500">A 2.4% processing fee applies to credit card payments.</span></p>
 
-    <!-- HOW THIS WORKS:
-         1. Set the form "action" to your Formspree endpoint so the project details are emailed to Accounting.
-         2. Set the hidden "_next" field value to your Clover payment page URL — after the form submits,
-            the client is redirected there to enter their card details.
-         Replace the two REPLACE_... placeholders below. -->
-    <form action="https://formspree.io/f/xwvjgbgq" method="POST">
-      <input type="hidden" name="_next" value="https://link.clover.com/urlshortener/BxMgMm">
-      <input type="hidden" name="_subject" value="King EPCM — Credit Card Payment Details">
+    <form id="payForm" data-clover="https://link.clover.com/urlshortener/BxMgMm" novalidate>
+      <input type="text" name="website" id="company_url" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
       <div class="grid grid-2" style="gap:16px">
         <div class="field">
           <label for="firstname">First name *</label>
@@ -139,6 +133,7 @@
         <input id="invoice" name="invoice_estimate_or_project" required>
       </div>
       <button type="submit" class="btn btn-gold">Proceed to Pay →</button>
+      <p class="form-note" id="payStatus" role="status" aria-live="polite" style="font-weight:600;margin-top:12px"></p>
       <p class="form-note">You'll be taken to our secure payment provider to enter your card details. A 2.4% processing fee applies to credit card payments. Questions? Email <a href="mailto:accounting@kingepcm.com">accounting@KingEPCM.com</a>.</p>
     </form>
 
@@ -188,6 +183,7 @@
 </footer>
 
 <script src="search.js"></script>
+<script src="forms.js"></script>
 <script>
   const h=document.getElementById('hamburger'),n=document.getElementById('navLinks');
   h&&h.addEventListener('click',()=>n.classList.toggle('open'));

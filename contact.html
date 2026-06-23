@@ -129,9 +129,8 @@
     <div>
       <h2 id="quote">Request a Quote</h2>
       <p class="lead" style="font-size:1rem;margin-bottom:20px">Tell us about your project and we'll provide a quote within 3 business days.</p>
-      <!-- NOTE: connect this form to a handler before going live (see DEPLOY_GUIDE).
-           Replace action with your Formspree endpoint or an Azure Function URL. -->
-      <form action="https://formspree.io/f/xdavqzqb" method="POST" enctype="multipart/form-data">
+      <form id="quoteForm" novalidate>
+        <input type="text" name="website" id="company_url" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <div class="field">
           <label for="name">Name *</label>
           <input id="name" name="name" required>
@@ -178,6 +177,7 @@
           <p class="form-note" style="margin-top:6px">Site plans, drawings, or reference documents — PDF, Word, Excel, images, or ZIP. If your file is too large to upload, please email it to <a href="mailto:sales@kingepcm.com">sales@KingEPCM.com</a>.</p>
         </div>
         <button type="submit" class="btn btn-gold">Send Request</button>
+        <p class="form-note" id="quoteStatus" role="status" aria-live="polite" style="font-weight:600;margin-top:12px"></p>
         <p class="form-note">Prefer email? Write to <a href="mailto:sales@kingepcm.com">sales@KingEPCM.com</a> for quotes, or call 416-342-3001.</p>
       </form>
     </div>
@@ -227,6 +227,7 @@
 </footer>
 
 <script src="search.js"></script>
+<script src="forms.js"></script>
 <script>
   const h=document.getElementById('hamburger'),n=document.getElementById('navLinks');
   h&&h.addEventListener('click',()=>n.classList.toggle('open'));
