@@ -1,32 +1,54 @@
 {
-  "$schema": "https://json.schemastore.org/staticwebapp.config.json",
-  "auth": {
-    "identityProviders": {
-      "azureActiveDirectory": {
-        "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/52e591ce-74f5-4c10-9dc3-b1020c47dc24/v2.0",
-          "clientIdSettingName": "AAD_CLIENT_ID",
-          "clientSecretSettingName": "AAD_CLIENT_SECRET"
-        }
-      }
-    }
-  },
   "routes": [
-    { "route": "/.auth/login/github", "statusCode": 404 },
-    { "route": "/login", "rewrite": "/.auth/login/aad" },
-    { "route": "/logout", "rewrite": "/.auth/logout" },
-    { "route": "/bye.html", "allowedRoles": ["anonymous", "authenticated"] },
-    { "route": "/*", "allowedRoles": ["authenticated"] }
+    { "route": "/index.html", "redirect": "/", "statusCode": 301 },
+    { "route": "/", "rewrite": "/index.html" },
+
+    { "route": "/about.html", "redirect": "/about", "statusCode": 301 },
+    { "route": "/about", "rewrite": "/about.html" },
+
+    { "route": "/services.html", "redirect": "/services", "statusCode": 301 },
+    { "route": "/services", "rewrite": "/services.html" },
+
+    { "route": "/team.html", "redirect": "/team", "statusCode": 301 },
+    { "route": "/team", "rewrite": "/team.html" },
+
+    { "route": "/careers.html", "redirect": "/careers", "statusCode": 301 },
+    { "route": "/careers", "rewrite": "/careers.html" },
+
+    { "route": "/contact.html", "redirect": "/contact", "statusCode": 301 },
+    { "route": "/contact", "rewrite": "/contact.html" },
+
+    { "route": "/pay.html", "redirect": "/pay", "statusCode": 301 },
+    { "route": "/pay", "rewrite": "/pay.html" },
+
+    { "route": "/chemical-environmental.html", "redirect": "/chemical-environmental", "statusCode": 301 },
+    { "route": "/chemical-environmental", "rewrite": "/chemical-environmental.html" },
+
+    { "route": "/natural-heritage-environmental.html", "redirect": "/natural-heritage-environmental", "statusCode": 301 },
+    { "route": "/natural-heritage-environmental", "rewrite": "/natural-heritage-environmental.html" },
+
+    { "route": "/civil-municipal-design.html", "redirect": "/civil-municipal-design", "statusCode": 301 },
+    { "route": "/civil-municipal-design", "rewrite": "/civil-municipal-design.html" },
+
+    { "route": "/survey-inspections.html", "redirect": "/survey-inspections", "statusCode": 301 },
+    { "route": "/survey-inspections", "rewrite": "/survey-inspections.html" },
+
+    { "route": "/geotechnical-hydrogeology.html", "redirect": "/geotechnical-hydrogeology", "statusCode": 301 },
+    { "route": "/geotechnical-hydrogeology", "rewrite": "/geotechnical-hydrogeology.html" },
+
+    { "route": "/permit-project-management.html", "redirect": "/permit-project-management", "statusCode": 301 },
+    { "route": "/permit-project-management", "rewrite": "/permit-project-management.html" },
+
+    { "route": "/mining-aggregate.html", "redirect": "/mining-aggregate", "statusCode": 301 },
+    { "route": "/mining-aggregate", "rewrite": "/mining-aggregate.html" },
+
+    { "route": "/project-onboarding.html", "redirect": "/project-onboarding", "statusCode": 301 },
+    { "route": "/project-onboarding", "rewrite": "/project-onboarding.html" }
   ],
   "responseOverrides": {
-    "401": { "redirect": "/.auth/login/aad", "statusCode": 302 }
+    "404": { "rewrite": "/index.html", "statusCode": 404 }
   },
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/assets/*", "*.css", "*.js", "*.json", "*.png", "*.jpg", "*.svg"]
-  },
-  "globalHeaders": {
-    "X-Frame-Options": "SAMEORIGIN",
-    "X-Content-Type-Options": "nosniff"
+  "mimeTypes": {
+    ".json": "application/json"
   }
 }

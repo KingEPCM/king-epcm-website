@@ -1,11 +1,10 @@
 {
-  "name": "king-epcm-intranet-api",
+  "name": "king-epcm-site-api",
   "version": "1.0.0",
-  "description": "Managed API for the King EPCM staff intranet (Azure Static Web Apps).",
-  "main": "teamwork-projects/index.js",
+  "description": "Azure Functions for the King EPCM public site (project onboarding form).",
+  "main": "onboarding-submit/index.js",
   "engines": { "node": ">=18" },
   "dependencies": {
-    "@azure/data-tables": "^13.2.2",
     "pdfkit": "^0.15.0"
   }
 }
