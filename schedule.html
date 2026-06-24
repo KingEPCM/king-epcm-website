@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>King EPCM — Staff Intranet</title>
+<title>Field Crew Schedule — King EPCM Intranet</title>
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -22,7 +22,6 @@
 </xml><![endif]-->
 </head>
 <body>
-
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:14px">
     <button class="hamb" id="hamb" aria-label="Menu">☰</button>
@@ -41,14 +40,13 @@
     </div>
   </div>
 </header>
-
 <nav class="sidebar" id="sidebar">
   <div class="navgroup">
     <div class="lbl">Menu</div>
-    <a class="item active" href="index.html"><span class="ic">⌂</span> Dashboard</a>
+    <a class="item" href="index.html"><span class="ic">⌂</span> Dashboard</a>
     <a class="item" href="news.html"><span class="ic">✦</span> Company News</a>
     <a class="item" href="calendar.html"><span class="ic">▦</span> Calendar</a>
-    <a class="item" href="schedule.html"><span class="ic">🚧</span> Field Schedule</a>
+    <a class="item active" href="schedule.html"><span class="ic">🚧</span> Field Schedule</a>
     <a class="item" href="projects.html"><span class="ic">◔</span> Project Status</a>
     <a class="item" href="resources.html"><span class="ic">≣</span> Resources</a>
     <a class="item" href="hr.html"><span class="ic">☷</span> HR Requests</a>
@@ -61,67 +59,38 @@
     <a class="item ext" href="https://workforce.intuit.com" target="_blank" rel="noopener"><span class="ic">↗</span> Workforce</a>
   </div>
 </nav>
-
 <main>
   <div class="pagehead">
-    <h1 id="welcome">Welcome back</h1>
-    <p>Here's what's happening across King EPCM.</p>
+    <h1>Field crew schedule</h1>
+    <p>Everyone's site visits and time off from QuickBooks Time. Switch between week, two weeks, and month, and click any shift for full details.</p>
   </div>
 
-  <div class="grid quick">
-    <a class="qcard" href="time-off.html"><span class="qic">🏖️</span><span class="qt">Request time off</span><span class="qd">How to book vacation &amp; sick days</span></a>
-    <a class="qcard" href="expense.html"><span class="qic">🧾</span><span class="qt">Submit an expense</span><span class="qd">Reimbursement &amp; mileage claims</span></a>
-    <a class="qcard" href="purchase-request.html"><span class="qic">🛒</span><span class="qt">Purchase request</span><span class="qd">Equipment, supplies &amp; software</span></a>
-    <a class="qcard" href="resources.html"><span class="qic">📘</span><span class="qt">Browse resources</span><span class="qd">SOPs, templates, vendors &amp; more</span></a>
-    <a class="qcard" href="profile.html#reviews"><span class="qic">📈</span><span class="qt">My performance reviews</span><span class="qd">KRAs &amp; quarterly development</span></a>
-  </div>
-
-  <div class="grid cols">
-    <div class="col-stack">
-      <section class="panel">
-        <div class="panel-head"><h2>My tasks — due &amp; overdue</h2><a href="projects.html">View all →</a></div>
-        <div id="task-list" data-limit="6"></div>
-      </section>
-      <section class="panel">
-        <div class="panel-head"><h2>My projects</h2><a href="projects.html">View all →</a></div>
-        <div id="project-list" data-limit="5"></div>
-      </section>
-      <section class="panel">
-        <div class="panel-head"><h2>SOPs &amp; flowcharts</h2><a href="resources.html">All resources →</a></div>
-        <div id="proc-list" data-limit="6"></div>
-      </section>
+  <section class="panel cal-card">
+    <div class="cal-toolbar">
+      <div class="cal-viewtoggle" role="tablist" aria-label="Schedule view">
+        <button class="cal-vbtn active" data-view="week" type="button">Week</button>
+        <button class="cal-vbtn" data-view="fortnight" type="button">2 Weeks</button>
+        <button class="cal-vbtn" data-view="month" type="button">Month</button>
+      </div>
+      <div class="cal-nav">
+        <button id="sched-prev" type="button" aria-label="Previous">‹</button>
+        <span id="sched-label"></span>
+        <button id="sched-next" type="button" aria-label="Next">›</button>
+        <button id="sched-today" type="button" class="cal-todaybtn">Today</button>
+      </div>
     </div>
-
-    <div class="col-stack">
-      <section class="panel cal-panel">
-        <div class="panel-head"><h2>🚧 Site visits today</h2><a href="schedule.html">Full schedule →</a></div>
-        <div id="site-visits"><div class="note" style="margin:0">Loading…</div></div>
-      </section>
-      <section class="panel cal-panel">
-        <div class="panel-head"><h2>Today's calendar</h2><a href="calendar.html">Full calendar →</a></div>
-        <div id="calendar-today"><div class="note" style="margin:0">Loading…</div></div>
-      </section>
-      <section class="panel news-panel">
-        <div class="panel-head"><h2>Company news</h2><a href="news.html">All news →</a></div>
-        <div id="news-list" data-limit="3"></div>
-      </section>
-      <section class="panel">
-        <div class="panel-head"><h2>HR quick requests</h2><a href="hr.html">HR centre →</a></div>
-        <div class="proc-cat">
-          <a href="time-off.html"><span class="fic">🏖️</span> Time-off / vacation request</a>
-          <a href="expense.html"><span class="fic">🧾</span> Expense reimbursement</a>
-          <a href="expense.html"><span class="fic">🚗</span> Mileage claim</a>
-          <a href="request-employment-letter.html"><span class="fic">📄</span> Employment letter</a>
-          <a href="purchase-request.html"><span class="fic">🛒</span> Purchase request</a>
-          <a href="hr.html#general-enquiry"><span class="fic">💬</span> General HR enquiry</a>
-        </div>
-      </section>
+    <div class="cal-legend">
+      <span><i class="crew"></i> Site visit / shift</span>
+      <span><i class="off"></i> Time off</span>
     </div>
-  </div>
+    <div id="sched-view"><div class="note" style="margin:0">Loading the schedule…</div></div>
+    <a href="https://workforce.intuit.com" target="_blank" rel="noopener" class="cal-outlook">Open in QuickBooks Time →</a>
+  </section>
+
   <footer class="site-footer">Need help using the site? Email <a href="mailto:it@kingepcm.com?subject=Intranet%20help">it@kingepcm.com</a></footer>
 </main>
 
-<!-- Event detail popup (site visits) -->
+<!-- Event detail popup -->
 <div class="cal-modal" id="cal-modal" aria-hidden="true">
   <div class="cal-modal-card" role="dialog" aria-modal="true" aria-labelledby="cd-title">
     <button type="button" class="cd-close" aria-label="Close">✕</button>
@@ -132,7 +101,6 @@
     <div class="cd-foot"></div>
   </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.4/lib/msal-browser.min.js"></script>
 <script src="app.js"></script>
 </body>

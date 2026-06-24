@@ -1,0 +1,41 @@
+[
+  {
+    "category": "Civil & Municipal Design",
+    "items": [
+      { "title": "Topographic Plan — procedure", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/04.%20Civil/Site%20Topographic%20Plan/Flowchart%20of%20Topo%20plan.pdf" },
+      { "title": "Sanitary Servicing — procedure", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/04.%20Civil/Site%20Servicing%20Plan/Flowchart%20for%20Sanitary%20Servicing.pdf" },
+      { "title": "Water Servicing — procedure", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/04.%20Civil/Site%20Servicing%20Plan/Flowchart%20for%20Water%20Servicing%20-.pdf" },
+      { "title": "Firefighting Flow Requirement — Stage 1", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/04.%20Civil/Firefighting%20Water%20Reservoir%20Calc/Flowchart%20for%20firefighting%20flow%20requirement.pdf" },
+      { "title": "Firefighting Flow Requirement — Stage 2", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/04.%20Civil/Firefighting%20Water%20Reservoir%20Calc/Flowchart%20for%20firefighting%20flow%20requirement-%20Stage%202.pdf" }
+    ]
+  },
+  {
+    "category": "Geotechnical & Hydrogeology",
+    "items": [
+      { "title": "Hydrogeology Investigation — procedure", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/05.%20GeoHyd/Hydrogeology%20Report%20-%20Investigation/Flowchart%20for%20Hydrogeology%20Investigation.pdf" },
+      { "title": "Pumping Test (Private Wells Supply, MECP D-5-5)", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/05.%20GeoHyd/Hydrogeology%20Report%20-%20Private%20Wells%20Supply%20MECP%20D-5-5/Flowchart%20for%20Pumping%20Test%20Procedure.pdf" },
+      { "title": "Septic Influence (MECP D-5-4)", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/05.%20GeoHyd/Hydrogeology%20Report%20-%20Septic%20Influence%20MECP%20D-5-4/Flowchart%20for%20Hydrog%20D-5-4.pdf" }
+    ]
+  },
+  {
+    "category": "Survey & Field Inspections",
+    "items": [
+      { "title": "Topographic Survey — procedure", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/07.%20Field/Survey%20-%20Topographic%20Elevations/Surveying%20Flowchart%20v3.pdf" },
+      { "title": "CCTV Inspection (from surface)", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/07.%20Field/CCTV/Flowchart%20-%20CCTV%20From%20Surface.pdf" },
+      { "title": "Concrete QA/QC — procedure", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/07.%20Field/Concrete%20QAQC%20-%20Field/Flowchart%20-%20Concrete%20QA-QC.pdf" }
+    ]
+  },
+  {
+    "category": "Natural Heritage Environmental",
+    "items": [
+      { "title": "Oak Ridges Moraine (ORMCP) Letter", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/02.%20Natural%20Heritage%20Environments/Oak%20Ridges%20Moraine%20Conformity%20Statement/Flowchart%20ORMCP%20Letter.pdf" }
+    ]
+  },
+  {
+    "category": "Office & Operations",
+    "items": [
+      { "title": "Weekly Scheduling — procedure", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/09.%20Indirect%20Deliverables/Start%20Field%20Work/Scheduling%20Flowchart%20V3-Appendix.pdf" },
+      { "title": "Field Dispatch Time Approvals", "url": "https://kingepcm.sharepoint.com/Shared%20Documents/03.%20Assets%20&%20Templates/09.%20Indirect%20Deliverables/Start%20Field%20Work/Dispatch%20time%20Approvals%20flowchart%20-(V2).pdf" }
+    ]
+  }
+]
