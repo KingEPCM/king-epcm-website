@@ -50,6 +50,14 @@
     .ob-card{padding:24px 20px;margin-top:-30px}
     .ob-row{grid-template-columns:1fr;gap:0}
   }
+  /* Desktop: each section reads as title/description on the left, fields on the right.
+     Sections stay stacked and aligned (no uneven-column gaps), using the full width.
+     The base .ob-group border-top already separates sections, so we don't add more. */
+  @media(min-width:861px){
+    .ob-group{display:grid;grid-template-columns:250px 1fr;column-gap:44px;align-items:start;padding:30px 0}
+    .ob-group .ob-grouphead{grid-column:1;grid-row:1 / span 99;margin:0;padding-right:8px}
+    .ob-group > *:not(.ob-grouphead){grid-column:2}
+  }
 </style>
 </head>
 <body>
@@ -107,7 +115,7 @@
 </section>
 
 <section class="section">
-  <div class="container" style="max-width:760px">
+  <div class="container" style="max-width:1040px">
 
     <form id="onboardForm" class="ob-card" novalidate>
       <!-- Anti-spam honeypot: real people leave this empty; it's hidden from view. -->
