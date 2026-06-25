@@ -176,12 +176,24 @@
       <section class="ob-group">
         <div class="ob-grouphead">
           <span class="ob-num">3</span>
-          <div><h2>Project contacts</h2><p>Optional — helps us route site visits, decisions, and deliverables.</p></div>
+          <div><h2>Project contacts</h2><p>Who we contact to schedule site visits and coordinate on site.</p></div>
+        </div>
+        <div class="ob-row">
+          <div class="field">
+            <label for="siteContactName">Site Contact Name <span class="ob-req">*</span></label>
+            <p class="form-note">Who we contact to schedule site visits.</p>
+            <input id="siteContactName" name="Site Contact Name" data-required autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="siteContactPhone">Site Contact Phone # <span class="ob-req">*</span></label>
+            <p class="form-note">Best number to reach them on site.</p>
+            <input id="siteContactPhone" name="Site Contact Phone" data-required autocomplete="off">
+          </div>
         </div>
         <div class="field">
-          <label for="siteContact">Primary Site Contact</label>
-          <p class="form-note">Who we contact to schedule site visits — include name, phone, and email.</p>
-          <textarea id="siteContact" name="Primary Site Contact" rows="2"></textarea>
+          <label for="siteContactEmail">Site Contact Email Address <span class="ob-req">*</span></label>
+          <p class="form-note">Where we send site-visit scheduling and coordination.</p>
+          <input id="siteContactEmail" name="Site Contact Email" type="email" data-required autocomplete="off">
         </div>
         <div class="field">
           <label>Are there additional people we should contact or cc?</label>
