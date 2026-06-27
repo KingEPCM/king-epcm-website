@@ -2417,58 +2417,53 @@
 
   /* ---------- Teamwork project → address type-ahead (any input[data-twproject]) ---------- */
   function initProjectAddressSearch() {
-    var inputs = document.querySelectorAll("input[data-twproject]");
-    if (!inputs.length) return;
-    Array.prototype.forEach.call(inputs, function (inp) { try { attachTwProjectSearch(inp); } catch (e) {} });
+    if (window._twPickerInit) return; window._twPickerInit = true;
+    // Lazy-attach on first focus so it also works for React-rendered inputs (bearing capacity).
+    document.addEventListener("focusin", function (e) {
+      var inp = e.target;
+      if (inp && inp.tagName === "INPUT" && inp.getAttribute && inp.getAttribute("data-twproject") != null && !inp._twAttached) {
+        inp._twAttached = true;
+        try { attachTwProjectSearch(inp); } catch (err) {}
+      }
+    });
   }
   function attachTwProjectSearch(inp) {
     inp.setAttribute("autocomplete", "off");
     function escHtml(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
     function escAttr(s) { return escHtml(s).replace(/"/g, "&quot;"); }
-    var wrap = document.createElement("div"); wrap.style.position = "relative";
-    inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+    // Dropdown lives on <body> (position:fixed) so we never re-parent the input — safe for React.
     var dd = document.createElement("div");
-    dd.style.cssText = "position:absolute;left:0;right:0;top:calc(100% + 2px);z-index:60;background:#fff;border:1px solid #d9dee6;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);max-height:260px;overflow:auto;display:none";
-    wrap.appendChild(dd);
-    var hint = document.createElement("div");
-    hint.style.cssText = "font-size:11.5px;color:#9aa3b2;margin-top:3px";
-    hint.textContent = "🔎 Type to find the Teamwork project, or enter any address.";
-    wrap.parentNode.insertBefore(hint, wrap.nextSibling);
-    var timer, lastQ = "";
+    dd.style.cssText = "position:fixed;z-index:9999;background:#fff;border:1px solid #d9dee6;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.16);max-height:260px;overflow:auto;display:none;font-family:inherit";
+    document.body.appendChild(dd);
+    var valueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    var timer, lastQ = "", items = [], suppress = false;
+    function place() { var r = inp.getBoundingClientRect(); dd.style.left = r.left + "px"; dd.style.top = (r.bottom + 3) + "px"; dd.style.width = r.width + "px"; }
     function close() { dd.style.display = "none"; }
-    inp.addEventListener("input", function () {
-      var q = inp.value.trim(); clearTimeout(timer);
-      if (q.length < 2) { close(); return; }
-      timer = setTimeout(function () { run(q); }, 250);
-    });
-    inp.addEventListener("blur", function () { setTimeout(close, 160); });
-    inp.addEventListener("focus", function () { if (dd.children.length && inp.value.trim().length >= 2) dd.style.display = "block"; });
+    function fill(v) { suppress = true; valueSetter.call(inp, v); inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true })); close(); }
+    function render() {
+      if (!items.length) { close(); return; }
+      var head = '<div style="padding:6px 11px;font-size:11px;color:#9aa3b2;border-bottom:1px solid #eef1f5">Teamwork projects — or keep typing any address</div>';
+      dd.innerHTML = head + items.map(function (p) {
+        return '<div class="tw-opt" data-name="' + escAttr(p.name) + '" style="padding:8px 11px;cursor:pointer;font-size:.9rem;border-bottom:1px solid #f1f4f8">' +
+          escHtml(p.name) + (p.company ? ' <span style="color:#8a93a3;font-size:.8rem">· ' + escHtml(p.company) + '</span>' : '') + '</div>';
+      }).join("");
+      place(); dd.style.display = "block";
+    }
     function run(q) {
-      if (q === lastQ && dd.children.length) { dd.style.display = "block"; return; }
-      lastQ = q;
+      if (q === lastQ) { render(); return; } lastQ = q;
       fetch("/api/teamwork-project-search?q=" + encodeURIComponent(q))
         .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (j) {
-          var items = (j && j.projects) || [];
-          if (!items.length) { dd.innerHTML = ""; close(); return; }
-          dd.innerHTML = items.map(function (p) {
-            return '<div class="tw-opt" data-name="' + escAttr(p.name) + '" style="padding:8px 11px;cursor:pointer;font-size:.9rem;border-bottom:1px solid #eef1f5">' +
-              escHtml(p.name) + (p.company ? ' <span style="color:#8a93a3;font-size:.8rem">· ' + escHtml(p.company) + '</span>' : '') + '</div>';
-          }).join("");
-          dd.style.display = "block";
-        })
-        .catch(function () { close(); });
+        .then(function (j) { items = (j && j.projects) || []; render(); })
+        .catch(close);
     }
+    inp.addEventListener("input", function () { if (suppress) { suppress = false; return; } var q = inp.value.trim(); clearTimeout(timer); if (q.length < 2) { close(); return; } timer = setTimeout(function () { run(q); }, 250); });
+    inp.addEventListener("blur", function () { setTimeout(close, 160); });
+    inp.addEventListener("focus", function () { if (items.length && inp.value.trim().length >= 2) { place(); dd.style.display = "block"; } });
+    window.addEventListener("scroll", function () { if (dd.style.display !== "none") place(); }, true);
+    window.addEventListener("resize", function () { if (dd.style.display !== "none") place(); });
     dd.addEventListener("mouseover", function (e) { var o = e.target.closest && e.target.closest(".tw-opt"); if (o) o.style.background = "#f3f6fb"; });
     dd.addEventListener("mouseout", function (e) { var o = e.target.closest && e.target.closest(".tw-opt"); if (o) o.style.background = ""; });
-    dd.addEventListener("mousedown", function (e) {     // mousedown fires before the input's blur
-      var opt = e.target.closest && e.target.closest(".tw-opt");
-      if (!opt) return;
-      e.preventDefault();
-      inp.value = opt.getAttribute("data-name");
-      close();
-      inp.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    dd.addEventListener("mousedown", function (e) { var o = e.target.closest && e.target.closest(".tw-opt"); if (!o) return; e.preventDefault(); fill(o.getAttribute("data-name")); });
   }
 
   document.addEventListener("DOMContentLoaded", function () {

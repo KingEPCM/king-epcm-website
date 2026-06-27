@@ -98,13 +98,13 @@
         <div class="full">
           <label>Activities (tick all that apply)</label>
           <div style="display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:2px">
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0"><input type="checkbox" class="actchk" value="bearing" checked onchange="pvcActivityChange()" style="width:auto"> Soil Bearing Capacity</label>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0"><input type="checkbox" class="actchk" value="drilling" onchange="pvcActivityChange()" style="width:auto"> Drilling &amp; Test Pit</label>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0"><input type="checkbox" class="actchk" value="hydro" onchange="pvcActivityChange()" style="width:auto"> Hydrogeology / Infiltration</label>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0"><input type="checkbox" class="actchk" value="slug" onchange="pvcActivityChange()" style="width:auto"> Slug / In-situ Permeameter</label>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0"><input type="checkbox" class="actchk" value="survey" onchange="pvcActivityChange()" style="width:auto"> Topographic Survey</label>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0"><input type="checkbox" class="actchk" value="chem" onchange="pvcActivityChange()" style="width:auto"> Chemical / ENV Sampling</label>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0"><input type="checkbox" class="actchk" value="other" onchange="pvcActivityChange()" style="width:auto"> Other (custom)</label>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0;font-size:.95rem"><input type="checkbox" class="actchk" value="bearing" checked onchange="pvcActivityChange()" style="width:auto"> Soil Bearing Capacity</label>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0;font-size:.95rem"><input type="checkbox" class="actchk" value="drilling" onchange="pvcActivityChange()" style="width:auto"> Drilling &amp; Test Pit</label>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0;font-size:.95rem"><input type="checkbox" class="actchk" value="hydro" onchange="pvcActivityChange()" style="width:auto"> Hydrogeology / Infiltration</label>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0;font-size:.95rem"><input type="checkbox" class="actchk" value="slug" onchange="pvcActivityChange()" style="width:auto"> Slug / In-situ Permeameter</label>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0;font-size:.95rem"><input type="checkbox" class="actchk" value="survey" onchange="pvcActivityChange()" style="width:auto"> Topographic Survey</label>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0;font-size:.95rem"><input type="checkbox" class="actchk" value="chem" onchange="pvcActivityChange()" style="width:auto"> Chemical / ENV Sampling</label>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0;font-size:.95rem"><input type="checkbox" class="actchk" value="other" onchange="pvcActivityChange()" style="width:auto"> Other (custom)</label>
           </div>
           <p class="hint">Pick one or more — the title, checklist items, and suggested times fill in from your selection (all editable).</p>
         </div>
@@ -176,12 +176,7 @@
       </details>
       <div class="grid">
         <div class="full"><label for="f_access">Specific site access details (gate, keys, hours, animals, parking…)</label><input id="f_access" placeholder="e.g., contact client to confirm; open access"></div>
-        <div class="full"><label>Field crew member(s) visiting</label>
-          <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:2px">
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0"><input type="checkbox" class="crewchk" value="Morteza" style="width:auto"> Morteza</label>
-            <label style="display:inline-flex;align-items:center;gap:6px;font-weight:400;margin:0"><input type="checkbox" class="crewchk" value="Mahmoud" style="width:auto"> Mahmoud</label>
-            <input id="f_crew_other" placeholder="Other / occasional (e.g., engineer name)" style="flex:1;min-width:170px">
-          </div><p class="hint" id="crewHint" style="margin:5px 0 0"></p></div>
+        <div><label for="f_crew">Field crew size (number to visit)</label><input id="f_crew" placeholder="e.g., 1"></div>
         <div><label for="f_mob">Mob &amp; de-mob time to prepare</label><input id="f_mob" placeholder="e.g., 1 hr"></div>
         <div><label for="f_drive">Drive time to site (each way)</label>
           <div style="display:flex;gap:8px;align-items:center">
@@ -222,9 +217,12 @@
 
     <div class="card">
       <h2 class="sec">7 · Definition of done</h2>
-      <label for="f_dod">Checklist items (one per line — these appear as check boxes)</label>
-      <textarea id="f_dod" style="min-height:170px"></textarea>
-      <p class="hint">Auto-filled from the visit type. Edit freely — each line becomes a ☐ item on the checklist.</p>
+      <p class="hint" style="margin:0 0 8px">Loaded from the activities above. <b>Tick the items that apply</b> to this visit — only ticked items appear as ☐ rows on the checklist. Add your own below.</p>
+      <div id="dodList"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="dodAdd" placeholder="Add a custom item…" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();pvcAddDod();}">
+        <button type="button" onclick="pvcAddDod()" style="white-space:nowrap;border:0;border-radius:8px;padding:9px 14px;font-size:.85rem;font-weight:600;cursor:pointer;background:#138d75;color:#fff">+ Add</button>
+      </div>
     </div>
 
     <div class="card">
@@ -235,9 +233,12 @@
 
     <div class="card">
       <h2 class="sec">9 · Health &amp; Safety / Site Hazard Assessment</h2>
-      <label for="f_hs">Site hazards — one per line (each becomes a ☐ item)</label>
-      <textarea id="f_hs" style="min-height:120px"></textarea>
-      <p class="hint">Pre-filled with the standard hazards — edit or add site-specific ones. The field-crew sign-off statement is added automatically after these on the checklist.</p>
+      <p class="hint" style="margin:0 0 8px"><b>Tick the hazards that apply</b> to this site — ticked items appear as ☐ rows on the checklist. Add site-specific ones below. The field-crew sign-off statement is added automatically after these.</p>
+      <div id="hsList"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input id="hsAdd" placeholder="Add a site-specific hazard…" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();pvcAddHs();}">
+        <button type="button" onclick="pvcAddHs()" style="white-space:nowrap;border:0;border-radius:8px;padding:9px 14px;font-size:.85rem;font-weight:600;cursor:pointer;background:#138d75;color:#fff">+ Add</button>
+      </div>
     </div>
 
     <div class="card">
@@ -307,10 +308,9 @@
   function setWhenField(id,v){var e=document.getElementById(id);if(!e||v==null||v==="")return;if(!e.value.trim()||e.value===_lastWhen[id]){e.value=v;_lastWhen[id]=v;}}
   function applyTimeGuide(sel){
     var acts=sel.filter(function(t){return TIME_GUIDE[t]&&t!=="other";});
-    var crewHint=document.getElementById("crewHint");
-    if(!acts.length){if(crewHint)crewHint.textContent="";return;}
+    if(!acts.length)return;
     var crew=Math.max.apply(null,acts.map(function(t){return TIME_GUIDE[t].crew||1;}));
-    if(crewHint)crewHint.textContent="Suggested crew size: "+crew+(acts.length>1?" (combined)":"");
+    setWhenField("f_crew",String(crew));
     if(acts.length===1){var g=TIME_GUIDE[acts[0]];setWhenField("f_mob",g.mob);setWhenField("f_drive",g.drive);setWhenField("f_work",g.work);setWhenField("f_total",g.total);return;}
     var withData=acts.filter(function(t){return TIME_GUIDE[t].workH!=null;});
     if(!withData.length)return;
@@ -320,12 +320,35 @@
     setWhenField("f_mob",TIME_GUIDE[baseT].mob);setWhenField("f_drive",TIME_GUIDE[baseT].drive);
     setWhenField("f_work",workSum+" hrs"+plus);setWhenField("f_total",(workSum+ohMax)+" hrs"+plus);
   }
+  /* Definition of Done = selectable checklist items (from the activities) + custom adds */
+  var DOD=[];
+  function dodItems(sel){var out=[],seen={};sel.forEach(function(t){(PRESETS[t]||[]).forEach(function(it){var k=it.toLowerCase().replace(/\s+/g," ").trim();if(!seen[k]){seen[k]=1;out.push(it);}});});return out;}
+  function renderDod(){
+    var box=document.getElementById("dodList"); if(!box) return;
+    if(!DOD.length){ box.innerHTML='<p class="hint" style="margin:0">Select an activity above to load the checklist items.</p>'; return; }
+    box.innerHTML=DOD.map(function(it,i){
+      return '<label style="display:flex;align-items:flex-start;gap:9px;padding:6px 2px;font-weight:400;margin:0;border-bottom:1px solid var(--line)">'+
+        '<input type="checkbox" class="dodchk" data-i="'+i+'"'+(it.checked?" checked":"")+' style="width:auto;margin-top:3px;flex:none">'+
+        '<span style="flex:1;font-size:.95rem">'+esc(it.text)+'</span>'+
+        (it.custom?'<button type="button" class="doddel" data-i="'+i+'" title="Remove" style="flex:none;border:0;background:none;color:#C0392B;cursor:pointer;font-size:1rem;line-height:1">✕</button>':'')+
+        '</label>';
+    }).join("");
+  }
+  function syncDod(sel){
+    var items=dodItems(sel), prev={}; DOD.forEach(function(d){prev[d.text.toLowerCase()]=d;});
+    var next=items.map(function(t){var ex=prev[t.toLowerCase()];return {text:t,checked:ex?ex.checked:true,custom:false};});
+    DOD.forEach(function(d){ if(d.custom && !next.some(function(n){return n.text.toLowerCase()===d.text.toLowerCase();})) next.push(d); });
+    DOD=next; renderDod();
+  }
+  window.pvcAddDod=function(){ var inp=document.getElementById("dodAdd"); if(!inp)return; var v=inp.value.trim(); if(!v)return; DOD.push({text:v,checked:true,custom:true}); inp.value=""; renderDod(); };
+  (function(){ var box=document.getElementById("dodList"); if(!box)return;
+    box.addEventListener("change",function(e){ var c=e.target; if(c.classList&&c.classList.contains("dodchk")){ var i=+c.getAttribute("data-i"); if(DOD[i])DOD[i].checked=c.checked; } });
+    box.addEventListener("click",function(e){ var b=e.target.closest&&e.target.closest(".doddel"); if(b){ DOD.splice(+b.getAttribute("data-i"),1); renderDod(); } });
+  })();
   window.pvcActivityChange=function(){
     var sel=selectedActs();
     document.getElementById("customTitleWrap").style.display=(sel.indexOf("other")>=0)?"block":"none";
-    var dod=document.getElementById("f_dod"),merged=mergedPreset(sel),cur=dod.value.trim();
-    if(!cur||cur===_lastPreset){dod.value=merged;}
-    _lastPreset=merged;
+    syncDod(sel);
     applyTimeGuide(sel);
   };
   window.pvcType=window.pvcActivityChange;
@@ -345,15 +368,24 @@
     "Mechanized equipment (skid steer, mini-ex, active drilling); machinery, gasoline, electrical hazards"
   ];
   var SIGNOFF="I, field crew member, confirm that I fully understand all the relevant concepts, take full ownership of my responsibilities, and am prepared to proceed to the job site.\nI will not go to the site unless I have all my questions answered, and I am 99.9% confident to fully complete the tasks on time and on budget.";
-  // pre-fill the editable Health & Safety box with the standard hazards
-  (function(){ var e=document.getElementById("f_hs"); if(e && !e.value.trim()) e.value=HS_ITEMS.join("\n"); })();
-
-  // field crew: checked roster names + any "Other" custom name, as a comma list
-  function crewValue(){
-    var names=Array.prototype.slice.call(document.querySelectorAll(".crewchk:checked")).map(function(c){return c.value;});
-    var other=val("f_crew_other"); if(other) names.push(other);
-    return names.join(", ");
+  // Health & Safety / Site Hazard Assessment = selectable tick-list (standard hazards) + custom adds
+  var HS=HS_ITEMS.map(function(t){return {text:t,checked:true,custom:false};});
+  function renderHs(){
+    var box=document.getElementById("hsList"); if(!box) return;
+    box.innerHTML=HS.map(function(it,i){
+      return '<label style="display:flex;align-items:flex-start;gap:9px;padding:6px 2px;font-weight:400;margin:0;border-bottom:1px solid var(--line)">'+
+        '<input type="checkbox" class="hschk" data-i="'+i+'"'+(it.checked?" checked":"")+' style="width:auto;margin-top:3px;flex:none">'+
+        '<span style="flex:1;font-size:.95rem">'+esc(it.text)+'</span>'+
+        (it.custom?'<button type="button" class="hsdel" data-i="'+i+'" title="Remove" style="flex:none;border:0;background:none;color:#C0392B;cursor:pointer;font-size:1rem;line-height:1">✕</button>':'')+
+        '</label>';
+    }).join("");
   }
+  window.pvcAddHs=function(){ var inp=document.getElementById("hsAdd"); if(!inp)return; var v=inp.value.trim(); if(!v)return; HS.push({text:v,checked:true,custom:true}); inp.value=""; renderHs(); };
+  (function(){ var box=document.getElementById("hsList"); if(!box)return;
+    box.addEventListener("change",function(e){ var c=e.target; if(c.classList&&c.classList.contains("hschk")){ var i=+c.getAttribute("data-i"); if(HS[i])HS[i].checked=c.checked; } });
+    box.addEventListener("click",function(e){ var b=e.target.closest&&e.target.closest(".hsdel"); if(b){ HS.splice(+b.getAttribute("data-i"),1); renderHs(); } });
+    renderHs();
+  })();
 
   // auto-calculate driving time (office -> site address) via the /api/drive-time function
   window.pvcCalcDrive=function(btn){
@@ -394,7 +426,7 @@
       ]},
       {band:"WHEN",rows:[
         row("Specific site access details (gate, keys, hours, animals, parking)",val("f_access")),
-        row("Field crew member(s) visiting",crewValue()),
+        row("Field crew members to visit",val("f_crew")),
         row("Mob & de-mob time to prepare",val("f_mob")),
         row("Drive time to site (each way)",val("f_drive")),
         row("Expected productive work hours on-site",val("f_work")),
@@ -418,9 +450,8 @@
         row("Why fieldwork solves the problem",val("f_solves"))
       ]}
     ];
-    var dod=val("f_dod").split(/\n+/).map(function(s){return s.replace(/^[-☐□\s]+/,"").trim();}).filter(Boolean);
-    var hs=val("f_hs").split(/\n+/).map(function(s){return s.replace(/^[-☐□\s]+/,"").trim();}).filter(Boolean);
-    if(!hs.length) hs=HS_ITEMS;
+    var dod=DOD.filter(function(d){return d.checked;}).map(function(d){return d.text;});
+    var hs=HS.filter(function(d){return d.checked;}).map(function(d){return d.text;});
     return {title:"Pre-Visit Checklist — "+titleText(),type:selectedActs().join(","),site:val("f_site")||"[Site location]",owner:val("f_owner"),date:val("f_date")||today(),issuer:iss,sections:sections,dod:dod,how:val("f_how"),hs:hs,signoff:SIGNOFF};
   }
 
@@ -768,7 +799,7 @@
     document.getElementById("f_primary").value="Conduct 4 core drillings on slab at highlighted locations; soil bearing capacity check in core locations (cover to 1 m below footing depth); observe surface conditions; record soil stratigraphy, colour, moisture; DCP, shear vane, sampling (USF–0.5 m–1 m); measure groundwater; photograph each borehole.";
     document.getElementById("f_secondary").value="Rebar scan and grout checking at four ~12' x 4' wall sections (highlighted) to check for rebar / grout in the cinderblock wall.";
     document.getElementById("f_access").value="N/A";
-    (function(){ var c=document.querySelector('.crewchk[value="Morteza"]'); if(c) c.checked=true; })();
+    document.getElementById("f_crew").value="1";
     document.getElementById("f_mob").value="1 hr";
     document.getElementById("f_drive").value="1:30 hr × 2";
     document.getElementById("f_work").value="7 hrs";

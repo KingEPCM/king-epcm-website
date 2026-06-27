@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bearing Capacity Report Builder — King EPCM Intranet</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<style>
+/* Bearing-capacity tool styles (rehoused in the intranet chrome; global body rule removed) */
+:root{--bg-primary:#ffffff;--bg-secondary:#f4f6fb;--text-primary:#1f2937;--text-secondary:#6b7280;--border-color:#d1d5db}
+#bc-root,#bc-root *{font-family:"Inter",system-ui,-apple-system,sans-serif !important}
+.bc-top{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#14294D;color:#fff;padding:11px 18px}
+.bc-top .t{font-weight:700;font-size:.95rem}
+.bc-top a{color:#E5A823;text-decoration:none;font-weight:600;font-size:.88rem}
+.bc-gate{max-width:640px;margin:40px auto;background:#fff;border:1px solid #e2e6ee;border-radius:12px;padding:24px}
+#bc-root{padding:16px 12px 60px}
+
+/* Mobile reflow (layout only — does not affect calculations): collapse the tool's
+   fixed multi-column grids to one column and cap the wide block on small screens. */
+@media (max-width: 640px) {
+  #bc-root [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+  /* Grid items default to min-width:auto, so native date/select controls refuse to
+     shrink and spill past the card. Let every grid item + control shrink to fit. */
+  #bc-root [style*="grid-template-columns"] > * { min-width: 0 !important; }
+  #bc-root input, #bc-root select, #bc-root textarea { width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box !important; }
+  #bc-root select, #bc-root input[type="date"] { -webkit-appearance: none; appearance: none; }
+  #bc-root select { padding-right: 34px; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2314294D' stroke-width='2'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
+  #bc-root [style*="width: 640"] { width: 100% !important; max-width: 100% !important; }
+  #bc-root { padding-left: 10px; padding-right: 10px; overflow-x: hidden; }
+}
+</style>
+
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:_ApprovalStatus msdt:dt="string">0</mso:_ApprovalStatus>
+<mso:_ApprovalAssignedTo msdt:dt="string"></mso:_ApprovalAssignedTo>
+<mso:_ApprovalRespondedBy msdt:dt="string"></mso:_ApprovalRespondedBy>
+<mso:_ApprovalSentBy msdt:dt="string"></mso:_ApprovalSentBy>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+<body>
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:14px">
+    <button class="hamb" id="hamb" aria-label="Menu">☰</button>
+    <a class="brand" href="index.html"><img src="assets/logo-white.png" alt="King EPCM" class="brand-logo">
+      <span class="sub">Staff Intranet</span></a>
+  </div>
+  <div class="userbox">
+    <a class="mailpill" id="mailPill" href="https://outlook.office.com/mail/" target="_blank" rel="noopener" title="Open your mailbox">📨 <span id="mailText">Inbox</span></a>
+    <div class="usermenu" id="userMenu">
+      <button class="usermenu-btn" id="userMenuBtn" aria-haspopup="true" aria-expanded="false"><span class="who">Staff</span><span class="avatar">·</span><span class="umcaret">▾</span></button>
+      <div class="usermenu-dropdown" role="menu">
+        <a href="profile.html" role="menuitem">👤 My profile</a>
+        <a href="https://workforce.intuit.com" target="_blank" rel="noopener" role="menuitem">💵 View payroll information</a>
+        <a href="/.auth/logout?post_logout_redirect_uri=/bye.html" role="menuitem">↪ Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+<nav class="sidebar" id="sidebar">
+  <div class="navgroup">
+    <div class="lbl">Menu</div>
+    <a class="item" href="index.html"><span class="ic">⌂</span> Dashboard</a>
+    <a class="item" href="my-work.html"><span class="ic">◎</span> My Work</a>
+    <a class="item" href="news.html"><span class="ic">✦</span> Company News</a>
+    <a class="item" href="calendar.html"><span class="ic">▦</span> Calendar</a>
+    <a class="item" href="schedule.html"><span class="ic">👥</span> Team Schedule</a>
+    <a class="item active" href="resources.html"><span class="ic">≣</span> Resources</a>
+    <a class="item" href="hr.html"><span class="ic">☷</span> Employee Centre</a>
+  </div>
+  <div class="navgroup">
+    <div class="lbl">Quick links</div>
+    <a class="item ext" href="https://kingepcm.sharepoint.com/Shared%20Documents/Forms/AllItems.aspx" target="_blank" rel="noopener"><span class="ic">↗</span> SharePoint</a>
+    <a class="item ext" href="https://kingepcm.teamwork.com" target="_blank" rel="noopener"><span class="ic">↗</span> Teamwork</a>
+    <a class="item ext" href="https://outlook.office.com" target="_blank"><span class="ic">↗</span> Outlook</a>
+    <a class="item ext" href="https://workforce.intuit.com" target="_blank" rel="noopener"><span class="ic">↗</span> Workforce</a>
+  </div>
+</nav>
+<main>
+  <a class="backlink" href="resources.html#templates">← Back to Resources</a>
+  <div style="display:flex;align-items:center;gap:16px;border-bottom:3px solid #E0A800;padding-bottom:12px;margin:4px 0 16px">
+    <img src="assets/logo-full.png" alt="King EPCM" style="height:54px;width:auto">
+    <div>
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1.3rem;color:var(--navy)">Bearing Capacity Report Builder</div>
+      <div style="font-size:.85rem;color:var(--muted)">King EPCM · v1.3 · Updated June 2026</div>
+    </div>
+  </div>
+  <div id="bc-gate" class="bc-gate" hidden><h2 style="margin:0 0 8px;color:#14294D">Engineering &amp; field staff only</h2><p style="margin:0;color:#333;line-height:1.55">This tool is for engineers and field staff. If you should have access, email <a href="mailto:it@kingepcm.com?subject=Bearing%20capacity%20tool%20access">it@kingepcm.com</a> to be added to the engineer or field group.</p></div>
+  <div id="bc-root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+// King EPCM — Bearing Capacity Report Builder  (v1.3)
+// React single-file component. Drop into a React/TS project (or a Claude artifact) and render <App/>.
+// Runtime deps: react; JSZip is loaded from a CDN at runtime (see the useEffect near the top of App).
+//
+// v1.3 additions over v1.2:
+//   • Figure 1 (site/borehole location) image upload — embedded in Word (.docx) and PDF; placeholder if blank.
+//   • Appendix A — up to 4 site photos, each with its own description; rendered as a 2x2 'Figure 2 - Site Photos' page.
+//   • PDF export (buildReportHtml + downloadPdf) and an inline Preview, in addition to the Word export.
+//   • Signature block is now mandatory (always rendered; the optional checkbox was removed).
+//   • Brand navy aligned to the King EPCM intranet (#14294D).
+// The intranet hosts this via a small HTML harness (React/Babel/JSZip via CDN + an engineer-role gate + ReactDOM mount);
+// that harness is NOT part of this component.
+
+const {
+  useState,
+  useEffect
+} = React;
+
+// ══ EMBEDDED LOGOS (base64 jpeg) ══════════════════════════════
+const LOGO_COVER_B64 = "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hqkSFY7q7JaW4kQHkRtNJIVB5ClQea9moA/lb/4La/sAft3/ABP+PHwF1L4afsVfFrxFbaT+y/4D0vVLnQvhzqd5HZX0Fq6z2srRQMI5o24eNiGQ9QK+hf8Ag5w/4Jhft36D/wAFIdJ/4Kd/skfB7xB430u8g0W8nm8L6K+p3OhaxpgjjiM1rGru0DJBA4k2lN3mK+35d/8AQ/RQB/O3/wAEQvgp/wAFt/20/wDgqxp/7bf7Wt38WPBvw90vWrzXvFUPiKTUdH0rUp2gkSDT7LT5mVZY/NZCQqGNEjbc24qG+Zf2g/2Gf+Cvn/BF7/gol8QfiV+y38BvGGsaf4gbXNP8J+OvDXg641i0vNH1Jn2/PAj/AGa7RWTKsVdJI8ruTDN/V9RQB/Pr/wAEw/2Cf+CrWnf8Eq/2vvit+19b/Fi+v/H3wV1DQfhn8N/Fl5qF9q17L9mneS4XT5WeWJ3byool2CWTMmF27C/ov/Bmn+yt+0/+zTcftFyftHfs4ePPh+utJ4TGjnxt4QvdK+3+SdY83yftUSebs82Pdtzt8xc43DP7i0UAfzZ/tSfsRftn69/wdVaX8fND/ZG+J174Ej/aK8H6lJ41tPAWoyaQtnC+mmW5N4sJhESBH3Sb9q7GyRg1H8Of2If20LL/AIOp7j4+Xn7InxOh8Ct+0dqmpr41k8A6iukGyaW4K3P2ww+T5RBBEm/acjB5r+lCigD+a/8A4IIfsM/tl/C3/gvNffE74v8A7I3xP8L+EZZPGKt4n8QeA9RsdP2zxXCxEXM0KxfPuG35vmyMZr4F8DfCn/goN+wf8dPjx8DPgV4Mm1W5m+FPijw58Q9Y0nTI9R0+48GlFlv7+O5G6KOForeNlnDBgSEH7xtlf2lV/Kf+0X/wb2f8Fnv2Fv2ivH3hr9jL4XeIPFXgnxhpup+HrPxT4L1K1b+1fDt8cSWN5FJIJIS0YRJQyhCyko7DDUAYX/BDX4mftq/CL9hz9sLx3/wT5svE1x8UrWHwAmhx+D/C41jUDC+q3iXHl2phm3jyTJuPlnauW4xkfun/AMG6nxn/AOCkHxy/Yp8T+K/+CoGneNLbx5b/ABPvbTR08deCRoN4dIXT9OeIrALa33xee91iTYcsGXcdmB5X/wAGvv8AwR1/aB/4Jg/Bzx/8SP2rLO00nxt8TrnTUXwra30d02j2FkLgxiaWFmjM0j3UhZUZ1VY4/m3Myr+p1ABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB/9k="; // with tagline — cover letterhead
+const LOGO_HEADER_B64 = "/9j/4AAQSkZJRgABAQEA3ADcAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAEzAg8DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAopvmR/31/OjzY/76/nQA6im+ZH/fX86PMj/vr+dADqKb5sf99fzo8yP++v50AOoozmkLKvUgfU0ALRTfMj/vr+dHmx/wB9fzoAdRTfMj/vr+dHmx/31/OgB1FICCMggigsq/eYD6mgBaKb5kf99fzo82P++v50AOopvmR/31/OjzI/76/nQA6im+bH/fX86A6McBlJ9jQA6iml0BwXUH3NHmx/31/OgB1FN8yP++v50eZH/fX86AHUU0SITgOpP1p1ABRRRQAUU3zI/wC+v50eZH/fX86AHUU3zY/76/nQHVjhWB+hoAdRRRQAUUUUAFFMlmigjMksiRoOrOwAH41kSeLvD0TFTrViSOuyZW/lSbS3C1zaorGh8WeH5mCprNjuPQNMqk/nWujpIgdGVlPIKnINCaewWsOooopgFFFFABRVLVpNRi02Z9Jgt574Y8qO4kKIeRnJAJHGe1eNaJ8avE2v+Kl8OWfh/SxfM8kYMly4TKAk84/2T2oA9yoryy/+IPjLQPEujabr3hqwhtdSukt1u7e5aRQWIB7dec4Nep0AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAU1wSjAdSKdRQB5VaeDb+Czhim8M2ssqIFeTzYjuIHJ55ps+hxWVzbw3/h22txcFgjjy3GQM4OPavV65Hxn/x+6L/11l/9FmvAzDLKFPD1K0W7pN/EzuoYmcpxi7W9DnP7E0r/AKBtp/35X/Cj+xNK/wCgbaf9+V/wq/RXwv1it/M/vZ7XJHsZR0e0lv4rKy0G2uZnjeXG2NAFUqDyfdhVj/hEbv8A6FS0/wC/kVaugf8AI5W//XjP/wChxV3VfZ5Vl1HEYSFWo3d3+0+55GJxE6dVxja3oZnh6zm0/wAOaZZXIAnt7WKKQA5G5VAPPfkVj+M9FutXOnNBYx3qQO5kikZQOVwD83FdXRX0VSlGpB05bM4IycZcyPL28K3Malm8JQMB1EbQk/kSKht9L0a6t454tOtdjjIzAAfxGODXXeJdfeN20nTH/wBOdf30w5Fqh7/75H3R+J464OiaM+tIkFqz2+jQDy2nQ4abHGyM+nYv+A55HymPy9SrRw+Dk+b7WraS8z06NdqDnVSt003MxdO0uedoLLREvZkOHW3tlYIfRmOFB9ic1ZHhS5YZXwlAo/23gB/QmvSLOzttPtY7a0gSGCMYVEGAKsV6lHIqMY2qTlJ+rRzTxs2/dSXyMPwlp1xpXhyCzuYVhlWSZvLRgQgaVmUZHHQiszxjoV1q1/p88OnRX0UMcqPHI6jDMUIPzcfwn866+ivVnRjOl7J7Wt/TOaM2pcy3PMf+ESu/+hUtP+/kNVbPTNKu7VJv7KtoySQUMSkggkEce4r1ivMdK/48B/11l/8AQ2r5TPcHDB0Yzotpt23fY9PB1pVZtTt9wz+xNK/6Btp/35X/AApG0XSlUn+zbTgZ/wBSv+FaFNk/1T/7pr5hYiq38T+9nouEexnWfhyW/soLyDwramGeNZEJeIEqRkcVp6L4XvbXxFp93/YlvYxwO7SSJImSDGygYXnqR+VdX4W/5FLR/wDryh/9AFa9fo1HK6FKaqRvdebPAniZyTi7fcec6l4VvZtc1G5bQbe9SefzElaSPO3aox83PY1nzaJb2UsSah4citRM2yOQpG6M2CcZUnBwD1A6V6tXN+NwP+EeD90u7Yj8ZkH8iawx2V0pwnVTalZvd7+hdHEzTjGyt6HJf2JpX/QNtP8Avyv+FH9iaV/0DbT/AL8r/hTxqUH9rNpp3CcQiYEj5WBJGAfUY6Vcr4GVWvG3NJ667s9xRg9kZz6Jp+3MFrFbTDDRzQxhXjYchgcdQea7nw3rJ1fTyJwqX1u3lXMa9A3Zh/ssOR9cdQa5eoVuZdI1CPVrdWfy12XMSjmWHOTgd2X7w/EfxV7OR5rKhW9nVd4y79GceMwynDmitUekVQ1y0mv9A1G0t8edPbSRx5OBuKkDn6mrVvPFdW8dxBIskMqh0dTkMpGQRUtffHiHl48JXSqM+E7Y4HO14Sf1IqCLStLeWWGXR4be4iIEkMsChlz0PGQQfUEivV64jxKgj8WQsOs1iQ3vsfj/ANDNfMZrldOjhpVqUpJrzZ6WGxMp1FGSVn5GBDotteySJp3h2O78ptkkixxoit6ZYjJ57Zrc8MeHLvT/ABGl62kQWEC20kbGN0JdmZCOF/3TW14KUDwtbt3eWZyfUmVzXQV6OAyynRUKt25W6t9uxz1sTKd42VgooqrqF/baZYy3d3II4Yxlj1PsAO5J4A71617HKPu7u3sbaS5upkhgjGXdzgAVx974o1DUiU0tPsVr/wA/MyZlceqoeFHu2T/s1n3Vxc65dreagpSJDutrQnIi/wBpvV/0HQdyW3lwLSzmuGBYRoW2jqcDp+NfI5ln8nP2GD9L/wCX+Z6mHwKS56v3FSS1iuL5Ymt7jV9RI3BZW81lH94ljtQfkPStqHw1r8iDP9m2Y7Ll5SPyCiui8O6ONI0tEkw15NiS6lxy8hHP4DoB2AFbFenQyWk4qWKbnLrdv8DnnjJXtT0Rws3hjXlQjOmXa/3SXiz+YasVreTRLgbobvQp2bCyRMPJkb8Mxk+zAH2r1So54IrmB4Z40licbWR1BDD0INaSyahHWg3B903+RKxc3pPVeZyen+L5LRlh15Y0jPC38QxH/wBtB/B9clfp0rO1HVp/EF15kE9zbaZHxAIZWiec/wDPQlSDt/uj8T2wur6OfDsqvGWk0iZggDncbZjwFJPVCeBnocDoRhleFmeZY7DQ+rVNH/Muq/R9ztw2Ho1H7SO3Y3fBLytp99HLPNMIr1kQzStIwXYhxliT1Jrpq5fwT/x56n/1/t/6LjrqK+rwcnLD0292l+R5lZWqSS7hXyD4Lv7rTPjG15ZabNqVxHc3RS1hYK0nyuOCeOOv4V9Y6tqlvoumzX92JTBCAW8qJpG5IHCqCT1r5Y8DTTaJ8WI9evtP1GPT1nuHMgs5GOHVwvAGe4rpMz2X4ZXU3jnw/qN54lgaaaDXHlhgnJP2VlClVXuNpJ4+ten14J408XW97ajQvB2jarCNT1BLm/u/sssQLFlzjPOSQM9Bge9e9DpQAtFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFcj4z/4/dF/66y/+izXXVyPjP8A4/dF/wCusv8A6LNcGaf7lV/ws3w38aPqZdFFFfl59GWNA/5HK3/68Z//AEOKu6rhdA/5HK3/AOvGf/0OKu6r9IyL/kX0/n+bPn8b/HkFc14i8QvayHTNNKtqDrl5CMrbKf4m9WPZfxPHVfEXiFrJ/wCztO2vqUi5LMMrbof429T6L3+gNc3oWhHXGYB5P7K3k3FyzfvL2T+IBv7uerd+g4rXF4qbn9Xw+s3u+kV3f6ImlSVvaVNvzDQtCOtkqrSLpKuTPcFj5l6+fmAbrjP3m79B3I9EhhjghSKJFjjRQqoowFA6ACiKKOCJIokWONAFVFGAoHQAVJXRhMJDDQ5Y6t7vq33ZnVquo7sKKKK6jMKKKKACvMdK/wCPAf8AXWX/ANDavTq8x0r/AI8B/wBdZf8A0Nq+Z4o/3aH+L9Gejlv8R+hcpsn+qf8A3TTqbJ/qn/3TXw8d0ew9jrfC3/IpaP8A9eUP/oArXrI8Lf8AIpaP/wBeUP8A6AK16/XVsfLvcK5zxv8A8i0f+vu1/wDR6V0dc543/wCRaP8A192v/o9KxxP8Gfo/yKp/GvU53T9HTWr3WIA4juEt7aS3mxny5A02D9OoI7gkVHaztNGyyxmK4iYxzxE8o46j3HcHuCD3rX8Jf8jBq3/Xtbf+hTU7xbpptJf7et1+VVCXyDvGOkn1Xv8A7Of7or5itlv1vK6VSC9+K+9dv8j0Y4j2WJlF7NmbRSAggEHIPelr449YueGNR/svUP7ImbFpcsXtCekcnVo/oeWX/gQ9BXbV5vdW63Vu0TMynIKupwyMDkMD2IIBH0rrfDWstqti0dztW/tiI7lV4BPZwP7rDkenI7V99kGZfWaXsaj96P4o8THYf2cueOzNuuK8U/8AI02H/XlL/wChpXa1xXin/kabD/ryl/8AQ0rtzn/canp+pjhP48TW8F/8ipaf70v/AKMat+sDwX/yKlp/vS/+jGrfr0KP8OPojCXxMO1ef6tfnXdYLBs6fZOUhHaWUcM/0HKj8T6V0virUJNP0KX7O226uGFvAfRm43fgMt+FcpbwR21vHBEuI41CqPYV89xHj3RpKhB6y39P+Cd2Aoqcud9CSq14glNpCf8AlreW6Eeo81c/pmrNREbtU0lPW+j/AEyf6V8llsebGUl/eX5nqYh2pSfkejiiiiv1I+bCiiigCG6tYb20mtriNZIJkKSI3RlIwRXncEU1lcXGm3Ll5rN9m9uskZGUf6leD/tBq9KrkfFenXQ1O01OytJbkmNre4SEAtj7yNyRwDvH/A68fO8D9awz5VeUdV+qOvB1vZ1NdmTeCf8Ajz1P/r/b/wBFx11Fc34Ntrq30+9a6tZbZprxpESUANt2oM8E9wa6SvQwcXHD04yVmkvyMKrTqSa7h0pu9P76/nUV7ZwahYz2d1GJLeeNo5EJI3KRgjj2r5JfR7AfHMaCIP8AiWf2wtv9n3tjy94G3Oc9K6DM+vQQRkGivlfxrdXPwy+K7Q+Fbie3tlEUn2QSs6NuHKEE8g+/rX1LC5kgjdlKMyglT2PpQA+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACuR8Z/8fui/wDXWX/0Wa66uR8Z/wDH7ov/AF1l/wDRZrgzT/cqv+Fm+G/jR9TLooor8vPoyxoP/I42/wD14z/+hxVseIvELaeRYWAWTUpV3DdysCf33/oO59gSONuNXn0bXbWW2iDTTW0sCO/+riZniwz+3bHckDjOat21uIA7NI8s0rb5ppOWkb1P+HQDAHAr62lmqwWWU4Q+N3t5avU8uWG9tiJN7IbFZxxwSxuzTNMS00khy0rHqWP+cdBwK6LwfqR+zHRLgj7RZIBE3TzYOit9R91vfB/iFY1QTrPHLDeWZC3ts2+IscBvVG/2WHB9OD1ArzcpzSWHxLlVd4z3/wAzoxWGVSnaO62PSaKpaVqcGr6bDfW+Qkg5VuGRgcMrehBBB+lXa/Q001dHghRRRTAKKKKACvMdK/48B/11l/8AQ2r06vMdK/48B/11l/8AQ2r5nij/AHaH+L9Gejlv8R+hcpsn+qf/AHTTqbJ/qn/3TXw8d0ew9jrfC3/IpaP/ANeUP/oArXrI8Lf8ilo//XlD/wCgCtev11bHy73Cuc8b/wDItH/r7tf/AEeldHXOeN/+RaP/AF92v/o9KxxP8Gfo/wAiqfxr1KPhH/kYNW/69rb/ANCmrsGUMpVgCCMEHvXH+Ef+Rg1b/r2tv/Qpq7GuXKf9xpehriv40jzq5sDoOqHTSD9jlBksWPZR96L6r2/2SOuDT66/XNIj1rTHti/lTKRJBMBkxSD7rf0I7gkd64m1mklV454/KuoXMU8Wc7HHUe4PBB7gg96+V4gy32FT6xTXuy38n/wT0sDiOePJLdE9Q/aJtLv4tVtUZ3iG2eJes0Xdf94dV9xjuamorwsNiJ4arGrT3R21KaqRcZHeWtzDeWsVzbyLJDKgeN1PDKRkGuQ8U/8AI02H/XlL/wChpTPDWo/2TqX9lzHFlduWtiekUp5ZPo3LD33DuBT/ABT/AMjTYf8AXlL/AOhpX3eOxUMVlc6sNmv12PFo03TxKizW8F/8ipaf70v/AKMat+sDwX/yKlp/vS/+jGrfr2aP8OPojkl8TOM8Wy+dr2m2v8MEMlww/wBo4Rf0L1QqbXG3+MrvP8FnAo/FpDUNfn3EFRzx0l2svwv+p7mBjaivMKjjGdd0Qf8AT6P/AEW5qSmRf8h/Q/8Ar9/9pSVy5V/vtL1Rrif4MvQ9Fooor9PPnAooooAKKKKACiiigAr5I1O1N9+0HNarcz2xm1sIJoG2yR5ccqecEV9YXsdxNYzxWlwLe4eNlimKBxGxHDbT1wecV48fgZqR8U/8JKfGI/tMXIuvM/sxceZnOdvmY69qAOu0r4T+HNP10a5dNe6rqYYOLjUZ/NIYdDjABI4xkcYruqq6bBd22nQQ394Ly6RcS3AiEYkPrtBIFWqACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACuR8Z/8AH7ov/XWX/wBFmuurkfGf/H7ov/XWX/0Wa4M0/wByq/4Wb4b+NH1Muiiivy8+jF06zg1DxItndRiSCbTrhHU9wXi/zmq6Rz2N3Npd4xe4t8FZD/y2jP3X+vBB9we2Kv6D/wAjjb/9eM//AKHFW34o0aTUbRLqzUHULTLwjOPMU/ejJ9GAGPQhT2r7Ohl6xuUQS+JXa+96fM8mdf2OKd9mc5RUNtcR3Vuk8ROxxnBGCPUEdiDwRU1fGyi4uz3R6qd9ULpWo/2DrHmOcafeuq3HpFLwFk+h4Vv+AnjBr0GvOpYknieKVA8bqVZWGQQeoNbnhLVXZW0a8kZ7m2XdDI5yZoegJPdl4VvwP8VfbcPZl7SH1ao9Vt5rt8vyPIx+H5X7SOz3Opooor6g80KKKKACvMdK/wCPAf8AXWX/ANDavTq8x0r/AI8B/wBdZf8A0Nq+Z4o/3aH+L9Gejlv8R+hcpsn+qf8A3TTqbJ/qn/3TXw8d0ew9jrfC3/IpaP8A9eUP/oArXrI8Lf8AIpaP/wBeUP8A6AK16/XVsfLvcK5zxv8A8i0f+vu1/wDR6V0dc543/wCRaP8A192v/o9KxxP8Gfo/yKp/GvUo+Ef+Rg1b/r2tv/Qpq7GuO8I/8jBq3/Xtbf8AoU1djXLlP+40vQ1xX8aQVyHi7TTbONetkJ8tQl6ij78Q6Pj1TJPupPXArr6QgEEEZFdeIoQxFJ0qi0ZlTm4SUo9Dz1SGUMpBB5BHelpt3p/9gar/AGeBixny9keyjq0X/Aeo/wBnj+E06vzHG4SeErOlPp+K7n0VGqqsFJEN1bpd27wvuAPRlOCpHIYHsQcEH2qs+sSanrdnDd4F/a2ckdxgYD/Om2QezDn2II7VfpnlR+d52xfN27d+OcdcZ9KvD42dKjUofZkvx7inRUpxn1R03gv/AJFS0/3pf/RjVv1geC/+RUtP96X/ANGNW/X6bR/hx9EfOy+JnB62u3xleZ/js4GH/fUoqGr3iuLyfEWn3P8ADcW8kBP+0pDKPyL/AJVRr8+4gpuGPk+9n+B7mBleigpkX/If0P8A6/f/AGlJT6ZF/wAh7RP+v3/2lJXLlX++0vVGuJ/gy9D0WiiqWszT2+h6hPa5+0R20jxYXJ3BSRx35r9PPnC7RXlqeIr8opbxVfgkc/6NB/8AGalg1vUbmbyYvFV80m0sF8i3BIGMnmH3H515E85oQTcoySX91nUsJN7Nfeem0V559q1z/oY7/wD7823/AMao+1a5/wBDJf8A/fm2/wDjVYf6x4Hu/uL/ALPreR6HRXmdxrOpWsixz+Kr5HYFgvkWxJA78Q+9bfgzVb7UNR1KK41Ke+t4ooWjeWFE2sxk3AFEXPCr6124XM6OKko009erWn3mVXDTpq8mjsa8+8RfFK30/wAVQ+FdC019Z1yRtrRLMIo4jjJDOQeQOSMcetd1ezm2sLicDJiiZwPXAzXyt8E7iS/+MVtd3LmSeVLiV3PUsUYk/qa9E5z3Gy+I96vi/T/C2t+GrjTtSvNxV1uFlhKBSdysAM8gjGBiu/rM1DQNP1LVtN1S5iJu9Nd2t3DY27l2sD6jFadABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABXI+M/8Aj90X/rrL/wCizXXVyPjP/j90X/rrL/6LNcGaf7lV/wALN8N/Gj6mXRRRX5efRljQP+Ryt/8Arxn/APQ4q7quF0D/AJHK3/68Z/8A0OKu6r9IyL/kX0/n+bPn8b/HkcL4h0/+x9V+3RLiwvpAJgOkU54Dewfof9rH96q9d1e2cGoWU1pdRiSCZCjqe4NefJFPYXk2l3jF57fBSQ/8toj91/rwQfcHtivD4iy3lf1qmtHv/mduAxF17KXyJ6guEmDxXVowS9tn8yFj0J6FW/2WGQfrnqBU9FfL0as6M1Ug7NHoyipRcXsdnpGqQ6xpsV7ACofIeNvvRuDhlPuDkVfrz3TtR/sHVvtLnGn3bBLodo36LL9Oit7YP8NehZr9Oy/GwxlBVY79V2Z87XoulNxYUUUV2mIV5jpX/HgP+usv/obV6dXmOlf8eA/66y/+htXzPFH+7Q/xfoz0ct/iP0LlNk/1T/7pp1Nk/wBU/wDumvh47o9h7HW+Fv8AkUtH/wCvKH/0AVr1keFv+RS0f/ryh/8AQBWvX66tj5d7hXOeN/8AkWj/ANfdr/6PSujrnPG//ItH/r7tf/R6Vjif4M/R/kVT+NepR8I/8jBq3/Xtbf8AoU1djXHeEf8AkYNW/wCva2/9Cmrsa5cp/wBxpehriv40gooor0TnM3W9Ji1nTJLV2McmQ8MoGTFIPusP8O4yO9cPayyOJIrmMRXcDmKeMfwuPT2IIIPcEV6VXJeLtMaJhrtqhLwpsu0UZMkI53Y7lMk+4LD0rxM7y363R5oL347efkdmDxHsp2ezMqimqyuiujBlYZBByCKdX55azPeOj8F/8ipaf70v/oxq36wPBf8AyKlp/vS/+jGrfr9ao/w4+iPl5fEzA8X2L3WhNNAhe4s3FzGo6tt+8o9ypYfjXMxSJNEksbBkcBlYdCDXop6V53eWJ0PV3sMYtJy0tm3YDq0f1U8j/ZPsa+c4kwLqU1iILWO/p/wDvy+soydN9R1Rpxrmin/p9H/oD1JULsI9S0qU9Evos/8AAjt/9mr5bK3bG0v8SPSxP8KXoekUUUV+oHzgVx3i/wD5GDR/+va6/wDQoK7GuN8XH/iotHH/AE63X/oUFebm/wDuNX0OjC/xomfRRRX5kfRFvw1/yNr/APXg3/oxa7euI8Nf8jc//Xg3/oxa7ev0rI/9wp/P82fP4z+PIa6LJGyMMqwwR6ivmXSNBk+E3xltLnWA8Whs8qwX20mMo6MFyR0IJAI/HpX0bqmt6Vokccmq6laWKSEqjXMyxhj6DcRmqtj4k8O67ObOw1jTL+UqWMMNwkpwO+ATxXqnKef33xIOvfETwxpXh2a4bSXuH+1XixssdwQhPlqSOQOp+or1kVlalr2g6E8MWp6pp9gzAmJLidIsgcZAJH6VJpevaRrYkOlapZXwix5n2adZNmemdpOOhoA0aKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoopHO1GPoM0ALXI+M/wDj90X/AK6y/wDos1jWfi/XLuzhuDqGkR+agfYbVjtyM4z5tRXeo3mpXVrLqGo2DpbFmVYITGSWGOSZG/lXgZhmmFnh6lKMveaa2e/3HdQw1SNSMmtC1RUP2u2/5+Iv++xR9rtv+fiL/vsV8F7OfY9vmRe0D/kcbf8A68Z//Q4q7qvMRdy22pw39hf2ccqRPERMnmAhip7OuD8n61e/4SjW/wDoKaP/AOAjf/Hq+2ynM8NQwkKVSVpK/R935Hj4rD1J1XKK0PQKwPFGjSalZpdWag6haZeHnHmA/ejJ9GAH0IU9qsaXqc174UtNVkVBNNZLcMq527im7A9s1yFr4t1y4tIZzqOkKZI1cr9lbjIzj/W17ONxOHpU+XEbS02b/I5KNOpKV4bobbXEd3bpPETscdCMEHuCOxB4Iqas63dlv7y6uL+zb7SwkMcEflqr/wATcu33uM+4J6k1b+123/PxF/32K/NsTRUKrVLWPR2Z9BTm3FOWjJJI0ljaORQyMCrKRkEHtWz4S1R1DaJdyFprdN1tIxyZYenJ7svAPttPc1hfa7b/AJ+Iv++xUM0sTPDPb3sUN1buJIZcg7T0IIyMggkEZ6GvQyfHTwVe8k+R7/5/IwxVFVoabo9Oorz/AP4SjW/+gpo//gI3/wAeqBPGmsyOsAudMVxLMpmMDFWCLCQAPM4P709z0r7WGa4Wom4y2V3o/wDI8iWFqxtdbno9eYaV/wAeI/66y/8AobVf/wCEo1v/AKCmj/8AgI3/AMerPsmhtbRInvIZHBZmYEKCSSTgZOOvrXz2fY6hiqMYUXdp9n29DuwVGdKbcy9TZP8AVP8A7pqP7Xbf8/EX/fYpGubZlI+0RcjH3xXyyhK+x6TaOy8Lf8ilo/8A15Q/+gCtevNrDW9X07T7ayh1XSTFbxLEha1YkhRgZ/e+1aOl+JtVm12ws7i606eG5d0YQQMjLhGbOfMb+76d6/SaOa4WrNU4S1fk/wDI+fnhqsU5NaHcVzfjdh/YMUfeS8twPwkVv5Kay9U8T6rDr2oWVvdadBDauiKJ4GdmzGjk58xe7Y6dqzLi/uNRnhl1PVLeYQMXjihQRxhsEbiCSScEjrjnpWGYZrh6UJ0rtys1az3LoYacpRl0NjwkQPEWqr3NrbH/AMemrs68y+0+ReJe2Oox29yqFCTtdXUkHDKevI7EH35NXP8AhJ9b/wCgpo//AICN/wDHq48rzbDUsLCnVbTWmzNcThakqjlHZnoNFZfh7UJdV8PWF/OEEs8Ku/ljC5PoCTx+NalfSJ3VzzwpCMjFLRTA88vtP/sDVfsQGLC5JezPZD1aL8Oq+2R/DS12Os6VFrOmSWkrFGOGjlUcxuOVYfQ/n071w9tJKTLb3SCO8t38udB0Deo/2SMEexr4biDLfY1PrFNe7Lfyf/BPZwOI54+zlujqvBf/ACKlp/vS/wDoxq36wPBf/IqWn+9L/wCjGrfr7Wj/AA4+iPIl8TCs/V9Jg1nT3tZ9y8ho5E+9G46MvuP/AK3Q1oUVbSasyU7anm3+k2d4dP1FQl2oyrKMJOv99P6jqPyJbfwyT2ciwkCZcPET0DqQyn8wK73U9Js9YtPs95FvUHcjA4aNuzKw5Brj7zRtX0kk+W2pWg6SwqBMo/2k/i+q8/7NfG5hkVWjU9vg9Une3Venc9ehjYzjyVTr9I1OHWNMhvYOA4w6HrG44ZT7g5FX68utL1Y72SbSdR+y3hx50LLkOR/z0ibBz78H3rbTxRr0a7XsdNuD/fEzxZ/Da3869mhnmGlG1Z8kuqaZyTwVRP3NUdtXDeIZ1uvFioh3CytdjEdnkYMV+uEU/wDAhST+IPEF0hRfsVgp4LRBpnH0LBQD9QayBcWOnfuWuA00jFiC2+WVj1OByxNcGbZtRr0Hh8N70pdkzbC4WUJqpU0SL9QXF0sLRxKjzXEpxFBEMvIfQD+ZPA7kVZtNK1nVSPKt/wCz7c9Z7tfnI/2Y+v8A30R9DXV6P4fstGDNArS3MgxLczHdJJ7E9h7DA9q83L+Ha1VqeI92Pbq/8jor4+EdIaso+G9BnsJZNQ1B1N9MgTyozlIUznaD/Ec9T+Xv0dFFfb0qUKMFTpqyR48pOb5pbnPeOLK0u/BusNc20Mxisp3jMkYbY2w8jPQ18reDrybwL8SdFurltsTeS0jdAYZkBz+Af8xX1h4w/wCRL1z/AK8J/wD0Wa+cfivoBi8KeCPEEScT6VBazEf3ljDL+YLf981oSVvjbfzaz4yn1ANmxt5W06392iCtIf8AvqTH4V738J7O2t/hroc0NvFHLNaqZXRAGc5PLEdfxrwz4oaG3h/wD4Hs5QftLxzz3BbqZJNjNn35x+Fe9fCz/kl/h7/r0X+ZoA6+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAM46Fo5OTpViSf+ndP8KP7B0f/AKBNh/4DJ/hWjRRYDO/sHR/+gTYf+Ayf4Uf2Do//AECbD/wGT/CtGigDO/sHR/8AoE2H/gMn+FH9g6P/ANAmw/8AAZP8K0aKAGJEkcQiRFWNRtCAYAHpj0qj/YOj/wDQJsf/AAHT/CtGigDO/sHR/wDoE2H/AIDJ/hR/YOj/APQJsP8AwGT/AArRooAzv7B0f/oE2H/gMn+FH9g6P/0CbD/wGT/CtGigDO/sHR/+gTYf+Ayf4U86NpbRLEdNszGpLKhgXAJ6kDHsKvUUAZ39g6P/ANAmw/8AAZP8KP7B0f8A6BNh/wCAyf4Vo0UAZ39g6P8A9Amw/wDAZP8ACj+wdH/6BNh/4DJ/hWjRQBnf2Do//QJsP/AZP8Kkg0nTrWUTW+n2sMg4DxwqpH4gVdooApT6Tp11KZbjT7WaU9XkhVifxIqP+wdH/wCgTYf+Ayf4Vo0UAZ39g6P/ANAmw/8AAZP8KP7B0f8A6BNh/wCAyf4Vo0UAMiijhiWKJFSNRhVUYAHoBT6KKACiiigArI1Hw1pWq3Qubu3kM4QJvinkiJUZIB2MM4yevrWvRUyipK0ldDTa1RWsLG20yyis7SMxwRAhVLFsZOepJJ5J61ZooqhBRRRQAUGiigCne6Xp+pKFvrG3uVHQTRK+PpkVlt4L0En5bOSMekNzLGPyVgK6CiplCMviVxqTWzMBfBegD71k8o9JriWQfkzEVqWWmWGmoUsbK3tlPUQxKmfyFW6KIwjH4VYHJvcKKKKoQUUUUAYfifwxD4psFsrjUtSsofmDixnEfmqRgq2Qcj2rFj+GGjf8I6mhXd9ql9YxzxTRLd3AcxeX0VflGFI4I9DXbUUAcB4o+EmjeL9Ra71bVdacbi0cC3K+XDnGQgKHA4FbvhPwhbeD7JrOz1HUrq3wqxx3kwdYQM8IAowOa6KigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Z"; // no tagline — running header
+
+// ══ CONSTANTS ══════════════════════════════════════════════════
+const CO = {
+  name: "King EPCM",
+  addr: "211-3780 14th Avenue",
+  city: "Markham, ON L3R 9Y5",
+  phone: "416-342-3001",
+  email: "Info@KingEPCM.com",
+  web: "www.KingEPCM.com"
+};
+const VANES = [{
+  name: "Size 4",
+  D: 5.1,
+  H: 10.2,
+  K: 2.057
+}, {
+  name: "Size 3",
+  D: 2.5,
+  H: 5.0,
+  K: 17.458
+}, {
+  name: "Size 2",
+  D: 2.0,
+  H: 4.0,
+  K: 34.105
+}, {
+  name: "Size 1",
+  D: 1.6,
+  H: 3.2,
+  K: 66.611
+}];
+const STRUCTS = ["Proposed residential dwelling", "Proposed commercial building", "Proposed industrial building", "Proposed addition", "Existing foundation assessment", "Storm water management", "Other"];
+const MOISTURE = ["Dry", "Moist", "Wet", "Saturated"];
+const TC = {
+  DCP: "#2196f3",
+  SCP: "#4caf50",
+  SV: "#ff9800"
+};
+const TL = {
+  DCP: "Dynamic Cone Penetration",
+  SCP: "Static Cone Penetrometer",
+  SV: "Shear Vane"
+};
+
+// ══ CALCULATIONS ══════════════════════════════════════════════
+const calcDPI = (blows, pen) => blows > 0 ? pen * 10 / blows : null;
+const calcSPT = dpi => dpi > 0 ? Math.pow(10, (Math.log10(dpi) + 1.05) / 2.03) : null;
+const calcN = spt => spt > 0 ? 300 / spt : null;
+const calcSu = (T, vi) => +(VANES[vi].K * T).toFixed(1);
+const calcBjj = (Su, PI) => +(Math.max(0.5, 1.7 - 0.54 * Math.log10(PI)) * Su).toFixed(1);
+const calcPhi = N => Math.min(45, Math.max(25, +(27.1 + 0.3 * N - 0.00054 * N * N).toFixed(1)));
+function calcMeyerhof(N, Bm, Dm) {
+  const B = Bm * 3.281,
+    D = Dm * 3.281,
+    K = Math.min(1.33, 1 + 0.33 * (D / B));
+  return +((B <= 4 ? N / 4 / K : N / 6 * Math.pow((B + 1) / B, 2) / K) * 47.88).toFixed(1);
+}
+function calcBowles(N, Bm, Dm) {
+  const B = Bm * 3.281,
+    D = Dm * 3.281,
+    K = Math.min(1.33, 1 + 0.33 * (D / B));
+  return +((B <= 4 ? N / 2.5 / K : N / 4 * Math.pow((B + 1) / B, 2) / K) * 47.88).toFixed(1);
+}
+function calcTerz(c, phi_deg, gamma, B, L, D, qs) {
+  const phi = phi_deg * Math.PI / 180;
+  const Nq = Math.exp(Math.PI * Math.tan(phi)) * Math.pow(Math.tan(Math.PI / 4 + phi / 2), 2);
+  const Nc = phi_deg > 0.1 ? (Nq - 1) / Math.tan(phi) : 5.14;
+  const Ng = phi_deg > 0.1 ? 1.8 * (Nq - 1) * Math.tan(phi) : 0;
+  const Sc = 1.2,
+    Sy = Math.max(0.4, 1 - 0.2 * (B / L));
+  return +(c * Nc * Sc + qs * Nq * 1 + 0.5 * gamma * B * Ng * Sy).toFixed(1);
+}
+
+// ══ STATE FACTORIES ═══════════════════════════════════════════
+const mkBH = n => ({
+  id: "BH" + (100 + n),
+  depth: "",
+  gwObs: false,
+  gwDepth: "",
+  refusal: false,
+  refusalDepth: "",
+  refusalNote: "gravel",
+  layers: [{
+    from: "0",
+    to: "",
+    soil: "",
+    moisture: "Moist"
+  }],
+  tests: []
+});
+const mkLayer = () => ({
+  from: "",
+  to: "",
+  soil: "",
+  moisture: "Moist"
+});
+const mkDCP = () => ({
+  type: "DCP",
+  depth: "",
+  blows: "50",
+  pen: ""
+});
+const mkSCP = () => ({
+  type: "SCP",
+  depth: "",
+  resistance: "",
+  movement: "no movement"
+});
+const mkSV = () => ({
+  type: "SV",
+  depth: "",
+  vaneIdx: 0,
+  torque: "",
+  PI: ""
+});
+
+// ══ DOCX BUILDER (matches King EPCM report template) ══════════
+// Written in string-concatenation style to avoid nested template literals.
+const ex = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const fDate = d => {
+  if (!d) return "[date]";
+  try {
+    return new Date(d + "T12:00:00").toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric"
+    });
+  } catch (e) {
+    return d;
+  }
+};
+function run(text, opts) {
+  opts = opts || {};
+  var rpr = "";
+  if (opts.bold) rpr += "<w:b/><w:bCs/>";
+  if (opts.underline) rpr += '<w:u w:val="single"/>';
+  if (opts.size) rpr += '<w:sz w:val="' + opts.size + '"/><w:szCs w:val="' + opts.size + '"/>';
+  var r = "<w:r>";
+  if (rpr) r += "<w:rPr>" + rpr + "</w:rPr>";
+  r += '<w:t xml:space="preserve">' + ex(text) + "</w:t></w:r>";
+  return r;
+}
+function P(content, o) {
+  o = o || {};
+  var ppr = "<w:pPr>";
+  if (o.style) ppr += '<w:pStyle w:val="' + o.style + '"/>';
+  if (o.tabPos) ppr += '<w:tabs><w:tab w:val="left" w:pos="' + o.tabPos + '"/></w:tabs>';
+  if (o.before != null || o.after != null) {
+    ppr += "<w:spacing";
+    if (o.before != null) ppr += ' w:before="' + o.before + '"';
+    if (o.after != null) ppr += ' w:after="' + o.after + '"';
+    ppr += "/>";
+  }
+  if (o.indLeft != null || o.indHanging != null || o.indFirst != null) {
+    ppr += "<w:ind";
+    if (o.indLeft != null) ppr += ' w:left="' + o.indLeft + '"';
+    if (o.indHanging != null) ppr += ' w:hanging="' + o.indHanging + '"';
+    if (o.indFirst != null) ppr += ' w:firstLine="' + o.indFirst + '"';
+    ppr += "/>";
+  }
+  if (o.jc) ppr += '<w:jc w:val="' + o.jc + '"/>';
+  ppr += "</w:pPr>";
+  return "<w:p>" + ppr + (content || "") + "</w:p>";
+}
+const wText = (text, o) => P(run(text, o), o || {});
+const wBlank = size => P("", size ? {
+  size: size
+} : {});
+const wHead = text => P(run(text, {
+  bold: true,
+  underline: true
+}), {});
+const wTitle = text => P(run(text, {
+  bold: true,
+  size: 32
+}), {
+  jc: "center"
+});
+const wBullet = text => '<w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr>' + run(text) + "</w:p>";
+function logoDrawing(rId, cx, cy, offX, offY, relHeight, docPrId) {
+  return '<w:r><w:rPr><w:noProof/></w:rPr><w:drawing>' + '<wp:anchor distT="0" distB="0" distL="114300" distR="114300" simplePos="0" relativeHeight="' + relHeight + '" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1">' + '<wp:simplePos x="0" y="0"/>' + '<wp:positionH relativeFrom="column"><wp:posOffset>' + offX + '</wp:posOffset></wp:positionH>' + '<wp:positionV relativeFrom="paragraph"><wp:posOffset>' + offY + '</wp:posOffset></wp:positionV>' + '<wp:extent cx="' + cx + '" cy="' + cy + '"/>' + '<wp:effectExtent l="0" t="0" r="0" b="0"/>' + '<wp:wrapNone/>' + '<wp:docPr id="' + docPrId + '" name="Logo' + docPrId + '"/>' + '<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>' + '<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' + '<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">' + '<pic:nvPicPr><pic:cNvPr id="' + docPrId + '" name="Logo' + docPrId + '"/><pic:cNvPicPr><a:picLocks noChangeAspect="1"/></pic:cNvPicPr></pic:nvPicPr>' + '<pic:blipFill><a:blip r:embed="' + rId + '"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>' + '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>' + '</pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>';
+}
+function joinAnd(arr) {
+  if (arr.length <= 1) return arr.join("");
+  if (arr.length === 2) return arr[0] + " and " + arr[1];
+  return arr.slice(0, -1).join(", ") + " and " + arr[arr.length - 1];
+}
+function numWord(n) {
+  var w = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+  return w[n] || String(n);
+}
+async function buildDocx(proj, bhs, recs, figImg, photos) {
+  var allT = [];
+  bhs.forEach(function (b) {
+    allT = allT.concat(b.tests);
+  });
+  var hasDCP = allT.some(function (t) {
+    return t.type === "DCP";
+  });
+  var hasSCP = allT.some(function (t) {
+    return t.type === "SCP";
+  });
+  var hasSV = allT.some(function (t) {
+    return t.type === "SV";
+  });
+  var tNames = [];
+  if (hasSCP) tNames.push("Static cone penetrometer tests");
+  if (hasDCP) tNames.push("Dynamic cone penetration tests");
+  if (hasSV) tNames.push("Shear vane tests");
+  var m2title = "Method Two – " + (tNames.length ? joinAnd(tNames) : "In-situ Tests");
+  var bhIds = bhs.map(function (b) {
+    return b.id;
+  }).join(", ");
+  var engName = proj.engineer || "Tony Wang";
+  var engCred = proj.engCred || "P. Eng";
+  var engTitle = proj.engTitle || "Principal Engineer";
+  var engPhone = proj.engPhone || "647-459-5647";
+  var engEmail = proj.engEmail || "Twang@KingEPCM.com";
+  var siteAddr = proj.address || "[Site Address]";
+  var p = [];
+
+  // ── COVER PAGE ──
+  p.push(P(logoDrawing("rIdLogoCover", 2158365, 818515, 151765, 55245, 251659264, 101) + run("King EPCM", {
+    bold: true
+  }), {
+    style: "Header",
+    jc: "right"
+  }));
+  p.push(P(run("211-3780 14") + '<w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t>th</w:t></w:r>' + run(" Avenue"), {
+    style: "Header",
+    jc: "right"
+  }));
+  ["Markham, ON L3R 9Y5", "T: 416-342-3001", "Info@KingEPCM.com", "www.KingEPCM.com"].forEach(function (l) {
+    p.push(P(run(l), {
+      style: "Header",
+      jc: "right"
+    }));
+  });
+  for (var i = 0; i < 4; i++) p.push(P("", {
+    jc: "center",
+    size: 28
+  }));
+  p.push(wTitle("Geotechnical Report"));
+  for (var j = 0; j < 2; j++) p.push(P("", {
+    jc: "center",
+    size: 32
+  }));
+  p.push(wTitle("Soil Bearing Capacity"));
+  p.push(P("", {
+    jc: "center",
+    size: 32
+  }));
+  p.push(wTitle("at"));
+  p.push(P("", {
+    jc: "center",
+    size: 32
+  }));
+  p.push(wTitle(siteAddr));
+  for (var k = 0; k < 3; k++) p.push(P("", {
+    jc: "center",
+    size: 28
+  }));
+  p.push(P(run("PREPARED:", {
+    bold: true
+  }), {
+    jc: "center"
+  }));
+  p.push(P("", {
+    jc: "center"
+  }));
+  p.push(P(run(fDate(proj.reportDate)), {
+    jc: "center"
+  }));
+  p.push('<w:p><w:r><w:br w:type="page"/></w:r></w:p>');
+
+  // ── BACKGROUND ──
+  p.push(wHead("Background"));
+  var bgDrilled = bhs.length > 1 ? "boreholes were" : "borehole was";
+  p.push(wText("A geotechnical investigation was conducted on " + fDate(proj.inspDate) + ", at " + siteAddr + ". " + "The purpose of this investigation is to classify the in-situ soil and determine the allowable bearing pressure of the in-situ soil. " + "The investigation is for a " + (proj.structureType ? proj.structureType.toLowerCase() : "proposed structure") + ". " + "The " + bgDrilled + " drilled by a field technician of King EPCM, and the Engineer supervising the investigation is " + engName + ", " + engTitle + " of King EPCM.", {}));
+  p.push(wBlank());
+
+  // ── BOREHOLE LOCATION ──
+  p.push(wHead("Borehole location"));
+  var bhCountWord = bhs.length === 1 ? "one borehole" : numWord(bhs.length) + " boreholes";
+  var bhVerb = bhs.length === 1 ? "was" : "were";
+  p.push(wText("For this investigation, " + bhCountWord + " (" + bhIds + ") " + bhVerb + " drilled in " + (proj.bhLoc || "the investigation area") + ".", {}));
+  p.push(wBlank());
+  p.push(figPara(figImg));
+  p.push(P('<w:r><w:t xml:space="preserve">Figure </w:t></w:r>' + '<w:fldSimple w:instr=" SEQ Figure \\* ARABIC "><w:r><w:rPr><w:noProof/></w:rPr><w:t>1</w:t></w:r></w:fldSimple>' + run(" - Location of boreholes at " + siteAddr), {
+    style: "Caption",
+    jc: "center"
+  }));
+  p.push(wBlank());
+
+  // ── METHOD ONE ──
+  p.push(wHead("Method One – Soil Characterization using USCS."));
+  bhs.forEach(function (bh) {
+    p.push(wText(bh.id + " was drilled down to " + (bh.depth || "?") + "m below grade. Generally, the soil is comprised of the following:", {}));
+    p.push(wText("Borehole " + bh.id + ":", {
+      before: 240,
+      indFirst: 709
+    }));
+    bh.layers.forEach(function (l) {
+      if (!l.soil) return;
+      var desc = l.soil + (l.moisture ? ", " + l.moisture.toLowerCase() : "");
+      p.push(P(run(l.from + " – " + l.to + " m:") + "<w:r><w:tab/></w:r>" + run(desc), {
+        indLeft: 2833,
+        indHanging: 2124,
+        tabPos: 2833
+      }));
+    });
+    if (bh.refusal) {
+      p.push(P(run(bh.refusalDepth + " m:") + "<w:r><w:tab/></w:r>" + run("auger refusal" + (bh.refusalNote ? " due to " + bh.refusalNote : "")), {
+        indLeft: 2833,
+        indHanging: 2124,
+        tabPos: 2833
+      }));
+    }
+    p.push(wBlank());
+    var gwLine = bh.gwObs ? "Groundwater observed at " + bh.gwDepth + "m below grade" : "No groundwater within the top " + (bh.depth || "?") + "m";
+    p.push(wText(gwLine, {
+      indFirst: 709
+    }));
+    p.push(wBlank());
+  });
+
+  // ── METHOD TWO ──
+  p.push(wHead(m2title));
+  p.push(wBlank());
+  bhs.forEach(function (bh) {
+    if (!bh.tests.length) return;
+    p.push(wText(bh.id, {}));
+    p.push(wText("The following in-situ tests were conducted to evaluate the bearing capacity:", {}));
+    bh.tests.forEach(function (t) {
+      var line;
+      if (t.type === "SCP") {
+        line = t.resistance + "kPa resistance with " + (t.movement || "no movement");
+      } else if (t.type === "DCP") {
+        var dpi = t.blows && t.pen ? calcDPI(+t.blows, +t.pen) : null;
+        var N = dpi ? +calcN(calcSPT(dpi)).toFixed(0) : null;
+        line = t.blows + " blows and " + t.pen + "cm penetration" + (N ? " (N \u2248 " + N + " blows/300mm)" : "");
+      } else {
+        var Su = t.torque ? calcSu(+t.torque, t.vaneIdx) : null;
+        var SuF = Su && t.PI ? calcBjj(Su, +t.PI) : Su;
+        line = "Shear vane (" + VANES[t.vaneIdx].name + ") \u2013 Su = " + (SuF || "?") + " kPa" + (t.PI ? " (Bjerrum corrected, PI = " + t.PI + ")" : "");
+      }
+      p.push(P(run(t.depth + "m:") + "<w:r><w:tab/></w:r>" + run(line), {
+        indLeft: 2833,
+        indHanging: 2124,
+        tabPos: 2833
+      }));
+    });
+    p.push(wBlank());
+  });
+
+  // ── SUMMARY ──
+  p.push(wHead("Summary"));
+  p.push(wBlank());
+  var scope = proj.structureType ? proj.structureType.toLowerCase() : "proposed structure";
+  if (proj.alsoDesignedFor) scope += " and " + proj.alsoDesignedFor;
+  p.push(wText("Based on the above field-testing results, the following parameters may be used for the design of the " + scope + ":", {}));
+  if (recs.sls) p.push(wBullet("Bearing capacity SLS = " + recs.sls + "kPa"));
+  if (recs.uls) p.push(wBullet("Bearing capacity ULS = " + recs.uls + "kPa"));
+  if (recs.Su) p.push(wBullet("Undrained shear strength = " + recs.Su + "kPa"));
+  var anyGW = bhs.some(function (b) {
+    return b.gwObs;
+  });
+  var maxD = Math.max.apply(null, [0].concat(bhs.map(function (b) {
+    return parseFloat(b.depth) || 0;
+  })));
+  p.push(wBullet(anyGW ? "Groundwater was observed during this investigation – refer to borehole logs for details" : "No groundwater within the top " + (maxD || "?") + "m"));
+  if (recs.notes) p.push(wBullet(recs.notes));
+  p.push(wBlank());
+  p.push(wBlank());
+
+  // ── DISCLAIMER ──
+  p.push(wText("For questions or concerns regarding this report, please contact " + engName + ", " + engCred + " at " + engPhone + " or " + engEmail + ". " + "This report is an intellectual property of King EPCM, and may only be used and relied upon by the property owner, its designers, engineers, or other personnel related to the project.", {}));
+  {
+    p.push(wBlank());
+    p.push(wBlank());
+    p.push(wText("Sincerely,", {}));
+    p.push(wBlank());
+    p.push(wText("________________________", {}));
+    p.push(wText(engName + ", " + engCred, {
+      bold: true
+    }));
+    p.push(wText(engTitle, {}));
+    p.push(wText("King EPCM", {}));
+  }
+  p.push(appendixDocx(photos));
+  // ── HEADER (pages 2+) : compact letterhead — logo left, lines right, top-aligned ──
+  var hdrLogoRun = '<w:r><w:rPr><w:noProof/></w:rPr><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="942800" cy="358479"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="301" name="HeaderLogo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="301" name="HeaderLogo"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogoHeader"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="942800" cy="358479"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
+  var pageLine = '<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:after="0"/><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr></w:pPr>' + '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t xml:space="preserve">Page </w:t></w:r>' + '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r>' + '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:instrText xml:space="preserve"> PAGE \\* MERGEFORMAT </w:instrText></w:r>' + '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:fldChar w:fldCharType="separate"/></w:r>' + '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t>2</w:t></w:r>' + '<w:r><w:rPr><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:fldChar w:fldCharType="end"/></w:r></w:p>';
+  var rLine = function (t) { return '<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:after="0"/></w:pPr>' + run(t, { size: 20 }) + '</w:p>'; };
+  var hdrTbl = '<w:tbl><w:tblPr><w:tblW w:w="9972" w:type="dxa"/><w:tblBorders><w:bottom w:val="single" w:sz="8" w:color="D9D9D9"/></w:tblBorders><w:tblLook w:val="04A0"/></w:tblPr>' +
+    '<w:tblGrid><w:gridCol w:w="5000"/><w:gridCol w:w="4972"/></w:tblGrid><w:tr>' +
+    '<w:tc><w:tcPr><w:tcW w:w="5000" w:type="dxa"/><w:vAlign w:val="top"/></w:tcPr><w:p><w:pPr><w:jc w:val="left"/><w:spacing w:after="0"/></w:pPr>' + hdrLogoRun + '</w:p></w:tc>' +
+    '<w:tc><w:tcPr><w:tcW w:w="4972" w:type="dxa"/><w:vAlign w:val="top"/></w:tcPr>' + rLine("Geotechnical Report") + rLine("Soil Stratigraphy & Bearing Capacity") + rLine(siteAddr) + pageLine + '</w:tc>' +
+    '</w:tr></w:tbl><w:p><w:pPr><w:pStyle w:val="Header"/><w:spacing w:after="0"/></w:pPr></w:p>';
+  var hdr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">' + hdrTbl + '</w:hdr>';
+  var hdrFirst = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="Header"/></w:pPr></w:p></w:hdr>';
+
+  // ── FOOTER ──
+  var ftr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' + '<w:p><w:pPr><w:pStyle w:val="Footer"/><w:pBdr><w:top w:val="single" w:sz="4" w:space="1" w:color="D9D9D9"/></w:pBdr><w:jc w:val="right"/></w:pPr></w:p>' + '<w:p><w:pPr><w:pStyle w:val="Footer"/></w:pPr></w:p></w:ftr>';
+
+  // ── DOCUMENT ──
+  var sectPr = '<w:sectPr>' + '<w:headerReference w:type="default" r:id="rIdHdr"/>' + '<w:headerReference w:type="first" r:id="rIdHdrFirst"/>' + '<w:footerReference w:type="default" r:id="rIdFtr"/>' + '<w:pgSz w:w="12240" w:h="15840"/>' + '<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/>' + '<w:pgBorders w:display="firstPage" w:offsetFrom="page">' + '<w:top w:val="thinThickSmallGap" w:sz="24" w:space="24" w:color="FFC000"/>' + '<w:left w:val="thinThickSmallGap" w:sz="24" w:space="24" w:color="FFC000"/>' + '<w:bottom w:val="thickThinSmallGap" w:sz="24" w:space="24" w:color="FFC000"/>' + '<w:right w:val="thickThinSmallGap" w:sz="24" w:space="24" w:color="FFC000"/>' + '</w:pgBorders>' + '<w:cols w:space="720"/><w:titlePg/></w:sectPr>';
+  var doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">' + '<w:body>' + p.join("") + sectPr + '</w:body></w:document>';
+
+  // ── STYLES ──
+  var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' + '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="en-CA"/></w:rPr></w:rPrDefault></w:docDefaults>' + '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>' + '<w:style w:type="paragraph" w:styleId="Header"><w:name w:val="header"/><w:basedOn w:val="Normal"/><w:pPr><w:tabs><w:tab w:val="center" w:pos="4986"/><w:tab w:val="right" w:pos="9972"/></w:tabs></w:pPr></w:style>' + '<w:style w:type="paragraph" w:styleId="Footer"><w:name w:val="footer"/><w:basedOn w:val="Normal"/><w:pPr><w:tabs><w:tab w:val="center" w:pos="4986"/><w:tab w:val="right" w:pos="9972"/></w:tabs></w:pPr></w:style>' + '<w:style w:type="paragraph" w:styleId="Caption"><w:name w:val="caption"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:spacing w:before="120" w:after="120"/></w:pPr><w:rPr><w:i/><w:iCs/></w:rPr></w:style>' + '<w:style w:type="paragraph" w:styleId="ListParagraph"><w:name w:val="List Paragraph"/><w:basedOn w:val="Normal"/><w:pPr><w:ind w:left="720"/><w:contextualSpacing/></w:pPr></w:style>' + '</w:styles>';
+
+  // ── NUMBERING ──
+  var numbering = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' + '<w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="hybridMultilevel"/>' + '<w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="\u2022"/><w:lvlJc w:val="left"/>' + '<w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr>' + '<w:rPr><w:rFonts w:ascii="Symbol" w:hAnsi="Symbol" w:hint="default"/></w:rPr></w:lvl></w:abstractNum>' + '<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>';
+
+  // ── PACKAGING ──
+  var ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' + '<Default Extension="xml" ContentType="application/xml"/>' + '<Default Extension="jpeg" ContentType="image/jpeg"/>' + '<Default Extension="png" ContentType="image/png"/>' + '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' + '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' + '<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>' + '<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>' + '<Override PartName="/word/header2.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>' + '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>' + '</Types>';
+  var relsRoot = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
+  var relsDoc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + '<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' + '<Relationship Id="rIdNum" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>' + '<Relationship Id="rIdHdr" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>' + '<Relationship Id="rIdHdrFirst" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header2.xml"/>' + '<Relationship Id="rIdFtr" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' + '<Relationship Id="rIdLogoCover" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/logo_cover.jpeg"/>' + '</Relationships>';
+  var relsHdr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + '<Relationship Id="rIdLogoHeader" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/logo_header.jpeg"/>' + '</Relationships>';
+  var zip = new window.JSZip();
+  zip.file("[Content_Types].xml", ct);
+  zip.file("_rels/.rels", relsRoot);
+  zip.file("word/document.xml", doc);
+  if (figImg && figImg.b64) {
+    relsDoc = relsDoc.replace("</Relationships>", '<Relationship Id="rIdFig1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/figure1.' + (figImg.mime === "image/png" ? "png" : "jpeg") + '"/></Relationships>');
+  }
+  (photos || []).forEach(function (p, i) {
+    if (p && p.img && p.img.b64) {
+      relsDoc = relsDoc.replace("</Relationships>", '<Relationship Id="rIdPhoto' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/figphoto' + (i + 1) + '.' + (p.img.mime === "image/png" ? "png" : "jpeg") + '"/></Relationships>');
+    }
+  });
+  zip.file("word/_rels/document.xml.rels", relsDoc);
+  zip.file("word/styles.xml", styles);
+  zip.file("word/numbering.xml", numbering);
+  zip.file("word/header1.xml", hdr);
+  zip.file("word/header2.xml", hdrFirst);
+  zip.file("word/footer1.xml", ftr);
+  zip.file("word/_rels/header1.xml.rels", relsHdr);
+  zip.file("word/media/logo_cover.jpeg", LOGO_COVER_B64, {
+    base64: true
+  });
+  zip.file("word/media/logo_header.jpeg", LOGO_COVER_B64, {
+    base64: true
+  });
+  if (figImg && figImg.b64) zip.file("word/media/figure1." + (figImg.mime === "image/png" ? "png" : "jpeg"), figImg.b64, {
+    base64: true
+  });
+  (photos || []).forEach(function (p, i) {
+    if (p && p.img && p.img.b64) zip.file("word/media/figphoto" + (i + 1) + "." + (p.img.mime === "image/png" ? "png" : "jpeg"), p.img.b64, {
+      base64: true
+    });
+  });
+  return await zip.generateAsync({
+    type: "blob",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  });
+}
+
+// ══ APP ═══════════════════════════════════════════════════════
+
+// ── Figure 1 helpers (Word) ──
+function figEmu(figImg) {
+  var maxW = 5800000,
+    maxH = 7200000;
+  var w = figImg.w || 1200,
+    h = figImg.h || 800;
+  var cx = maxW,
+    cy = Math.round(maxW * h / w);
+  if (cy > maxH) {
+    cy = maxH;
+    cx = Math.round(maxH * w / h);
+  }
+  return {
+    cx: cx,
+    cy: cy
+  };
+}
+function figPara(figImg) {
+  if (!figImg || !figImg.b64) return P(run("[ Insert Figure 1 — site / borehole location image here ]"), {
+    jc: "center",
+    before: 120,
+    after: 60
+  });
+  var d = figEmu(figImg);
+  return '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="120" w:after="60"/></w:pPr><w:r><w:drawing>' + '<wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="' + d.cx + '" cy="' + d.cy + '"/><wp:effectExtent l="0" t="0" r="0" b="0"/>' + '<wp:docPr id="201" name="Figure 1"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>' + '<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' + '<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="201" name="Figure 1"/><pic:cNvPicPr/></pic:nvPicPr>' + '<pic:blipFill><a:blip r:embed="rIdFig1"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>' + '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + d.cx + '" cy="' + d.cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>' + '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
+}
+
+// ── PDF export (print-friendly HTML mirroring the Word report) ──
+function buildReportHtml(proj, bhs, recs, figImg, photos) {
+  var e = ex;
+  var engName = proj.engineer || "Tony Wang",
+    engCred = proj.engCred || "P. Eng",
+    engTitle = proj.engTitle || "Principal Engineer",
+    engPhone = proj.engPhone || "647-459-5647",
+    engEmail = proj.engEmail || "Twang@KingEPCM.com",
+    siteAddr = proj.address || "[Site Address]";
+  var allT = [];
+  bhs.forEach(function (b) {
+    allT = allT.concat(b.tests);
+  });
+  var hasDCP = allT.some(function (t) {
+      return t.type === "DCP";
+    }),
+    hasSCP = allT.some(function (t) {
+      return t.type === "SCP";
+    }),
+    hasSV = allT.some(function (t) {
+      return t.type === "SV";
+    });
+  var tNames = [];
+  if (hasSCP) tNames.push("Static cone penetrometer tests");
+  if (hasDCP) tNames.push("Dynamic cone penetration tests");
+  if (hasSV) tNames.push("Shear vane tests");
+  var m2title = "Method Two – " + (tNames.length ? joinAnd(tNames) : "In-situ Tests");
+  var bhIds = bhs.map(function (b) {
+    return b.id;
+  }).join(", ");
+  var s = [];
+  s.push('<div class="cover"><img class="logo" src="data:image/jpeg;base64,' + LOGO_COVER_B64 + '" alt="King EPCM"/>');
+  s.push('<div class="addr">211-3780 14<sup>th</sup> Avenue<br>Markham, ON L3R 9Y5<br>T: 416-342-3001<br>Info@KingEPCM.com<br>www.KingEPCM.com</div>');
+  s.push('<h1 class="ct">Geotechnical Report</h1><h1 class="ct">Soil Bearing Capacity</h1><div class="cat">at</div><h1 class="ct">' + e(siteAddr) + '</h1>');
+  s.push('<p class="prep"><b>PREPARED:</b><br>' + e(fDate(proj.reportDate)) + '</p></div>');
+  s.push('<h3>Background</h3>');
+  var bgDrilled = bhs.length > 1 ? "boreholes were" : "borehole was";
+  s.push('<p>A geotechnical investigation was conducted on ' + e(fDate(proj.inspDate)) + ', at ' + e(siteAddr) + '. The purpose of this investigation is to classify the in-situ soil and determine the allowable bearing pressure of the in-situ soil. The investigation is for a ' + e(proj.structureType ? proj.structureType.toLowerCase() : "proposed structure") + '. The ' + bgDrilled + ' drilled by a field technician of King EPCM, and the Engineer supervising the investigation is ' + e(engName) + ', ' + e(engTitle) + ' of King EPCM.</p>');
+  s.push('<h3>Borehole location</h3>');
+  var bhCountWord = bhs.length === 1 ? "one borehole" : numWord(bhs.length) + " boreholes";
+  var bhVerb = bhs.length === 1 ? "was" : "were";
+  s.push('<p>For this investigation, ' + bhCountWord + ' (' + e(bhIds) + ') ' + bhVerb + ' drilled in ' + e(proj.bhLoc || "the investigation area") + '.</p>');
+  if (figImg && figImg.b64) s.push('<div class="figimg"><img src="data:' + figImg.mime + ';base64,' + figImg.b64 + '" alt="Figure 1"/></div>');else s.push('<div class="fig">[ Insert Figure 1 — site / borehole location image here ]</div>');
+  s.push('<p class="cap">Figure 1 - Location of boreholes at ' + e(siteAddr) + '</p>');
+  s.push('<h3>Method One – Soil Characterization using USCS.</h3>');
+  bhs.forEach(function (bh) {
+    s.push('<p>' + e(bh.id) + ' was drilled down to ' + e(bh.depth || "?") + 'm below grade. Generally, the soil is comprised of the following:</p>');
+    s.push('<p class="ind"><b>Borehole ' + e(bh.id) + ':</b></p><table class="lyr">');
+    bh.layers.forEach(function (l) {
+      if (!l.soil) return;
+      var desc = l.soil + (l.moisture ? ", " + l.moisture.toLowerCase() : "");
+      s.push('<tr><td class="k">' + e(l.from) + ' – ' + e(l.to) + ' m:</td><td>' + e(desc) + '</td></tr>');
+    });
+    if (bh.refusal) s.push('<tr><td class="k">' + e(bh.refusalDepth) + ' m:</td><td>auger refusal' + (bh.refusalNote ? ' due to ' + e(bh.refusalNote) : '') + '</td></tr>');
+    s.push('</table>');
+    var gwLine = bh.gwObs ? "Groundwater observed at " + e(bh.gwDepth) + "m below grade" : "No groundwater within the top " + e(bh.depth || "?") + "m";
+    s.push('<p class="ind">' + gwLine + '</p>');
+  });
+  s.push('<h3>' + e(m2title) + '</h3>');
+  bhs.forEach(function (bh) {
+    if (!bh.tests.length) return;
+    s.push('<p>' + e(bh.id) + '</p><p>The following in-situ tests were conducted to evaluate the bearing capacity:</p><table class="lyr">');
+    bh.tests.forEach(function (t) {
+      var line;
+      if (t.type === "SCP") {
+        line = e(t.resistance) + "kPa resistance with " + e(t.movement || "no movement");
+      } else if (t.type === "DCP") {
+        var dpi = t.blows && t.pen ? calcDPI(+t.blows, +t.pen) : null;
+        var N = dpi ? +calcN(calcSPT(dpi)).toFixed(0) : null;
+        line = e(t.blows) + " blows and " + e(t.pen) + "cm penetration" + (N ? " (N \u2248 " + N + " blows/300mm)" : "");
+      } else {
+        var Su = t.torque ? calcSu(+t.torque, t.vaneIdx) : null;
+        var SuF = Su && t.PI ? calcBjj(Su, +t.PI) : Su;
+        line = "Shear vane (" + e(VANES[t.vaneIdx].name) + ") \u2013 Su = " + (SuF || "?") + " kPa" + (t.PI ? " (Bjerrum corrected, PI = " + e(t.PI) + ")" : "");
+      }
+      s.push('<tr><td class="k">' + e(t.depth) + 'm:</td><td>' + line + '</td></tr>');
+    });
+    s.push('</table>');
+  });
+  s.push('<h3>Summary</h3>');
+  var scope = proj.structureType ? proj.structureType.toLowerCase() : "proposed structure";
+  if (proj.alsoDesignedFor) scope += " and " + proj.alsoDesignedFor;
+  s.push('<p>Based on the above field-testing results, the following parameters may be used for the design of the ' + e(scope) + ':</p><ul>');
+  if (recs.sls) s.push('<li>Bearing capacity SLS = ' + e(recs.sls) + 'kPa</li>');
+  if (recs.uls) s.push('<li>Bearing capacity ULS = ' + e(recs.uls) + 'kPa</li>');
+  if (recs.Su) s.push('<li>Undrained shear strength = ' + e(recs.Su) + 'kPa</li>');
+  var anyGW = bhs.some(function (b) {
+    return b.gwObs;
+  });
+  var maxD = Math.max.apply(null, [0].concat(bhs.map(function (b) {
+    return parseFloat(b.depth) || 0;
+  })));
+  s.push('<li>' + (anyGW ? "Groundwater was observed during this investigation – refer to borehole logs for details" : "No groundwater within the top " + (maxD || "?") + "m") + '</li>');
+  if (recs.notes) s.push('<li>' + e(recs.notes) + '</li>');
+  s.push('</ul>');
+  s.push('<p>For questions or concerns regarding this report, please contact ' + e(engName) + ', ' + e(engCred) + ' at ' + e(engPhone) + ' or ' + e(engEmail) + '. This report is an intellectual property of King EPCM, and may only be used and relied upon by the property owner, its designers, engineers, or other personnel related to the project.</p>');
+  s.push('<p>Sincerely,</p><p class="sig">________________________<br><b>' + e(engName) + ', ' + e(engCred) + '</b><br>' + e(engTitle) + '<br>King EPCM</p>');
+  var _ph = (photos || []).filter(function (p) {
+    return p && p.img && p.img.b64;
+  });
+  if (_ph.length) {
+    s.push('<div class="appx"><h3>Appendix A \u2013 Site Photos</h3><div class="pgrid">');
+    _ph.forEach(function (p) {
+      s.push('<figure><img src="data:' + p.img.mime + ';base64,' + p.img.b64 + '"/><figcaption>' + e(p.desc || '') + '</figcaption></figure>');
+    });
+    s.push('</div><p class="cap">Figure 2 - Site Photos</p></div>');
+  }
+  var css = '@page{size:Letter;margin:0.5in}body{font-family:"Times New Roman",Times,serif;font-size:12pt;color:#222;margin:0;padding:46px 54px;line-height:1.45}' + 'h3{color:#14294D;text-decoration:underline;font-size:12pt;margin:18px 0 6px}p{margin:0 0 10px}.ind{margin-left:40px}' + '.fig{text-align:center;color:#999;border:1px dashed #bbb;padding:28px;margin:14px 0}.figimg{text-align:center;margin:14px 0}.figimg img{max-width:100%;max-height:420px}.cap{text-align:center;font-style:italic;font-size:10.5pt}' + 'table.lyr{border-collapse:collapse;margin:4px 0 10px 40px}table.lyr td{padding:2px 12px 2px 0;vertical-align:top}table.lyr td.k{white-space:nowrap;font-weight:600}' + 'ul{margin:0 0 10px 22px}li{margin-bottom:4px}.sig{margin-top:24px}' + '.cover{text-align:center;border:6px double #E5A823;padding:40px 30px;margin-bottom:28px;page-break-after:always;min-height:9.4in;box-sizing:border-box}' + '.cover .logo{height:64px;float:left}.cover .addr{text-align:right;font-size:10.5pt;margin-bottom:70px;overflow:hidden}' + '.cover .ct{color:#14294D;font-size:22pt;margin:12px 0;clear:both}.cover .cat{font-size:15pt;color:#14294D;margin:4px 0}.cover .prep{margin-top:90px}' + '.appx{page-break-before:always}.appx h3{margin-bottom:10px}.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0 4px}.pgrid figure{margin:0;text-align:center}.pgrid img{max-width:100%;max-height:320px;border:1px solid #ccc}.pgrid figcaption{font-size:10pt;font-style:italic;margin-top:5px}' + 'table.rpt{width:100%;border-collapse:collapse}thead.rhd{display:table-header-group}table.rpt>tbody>tr>td,table.rpt>thead>tr>td{padding:0;border:0;vertical-align:top}.rhdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid #cfcfcf;padding-bottom:6px;margin-bottom:12px}.rhdr img{height:42px;width:auto}.rhdr .ri{text-align:right;font-size:9.5pt;color:#666;line-height:1.3}.wm{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:9999;pointer-events:none}.wm span{transform:rotate(-45deg);font:700 150pt/1 Arial,Helvetica,sans-serif;letter-spacing:10px;color:rgba(110,110,110,0.16)}@media print{body{padding:0}.cover{margin:0}}';
+  return '<!doctype html><html><head><meta charset="utf-8"><title>Geotechnical Report — ' + e(siteAddr) + '</title><style>' + css + '</style></head><body>' + '<div class="wm"><span>DRAFT</span></div>' + (function(){var a=s.join(""),c=a.indexOf("<h3>Background</h3>");if(c<0)return a;return a.slice(0,c)+'<table class="rpt"><thead class="rhd"><tr><td><div class="rhdr"><img src="data:image/jpeg;base64,'+LOGO_COVER_B64+'" alt="King EPCM"/><div class="ri">Geotechnical Report<br>Soil Stratigraphy &amp; Bearing Capacity<br>'+e(siteAddr)+'</div></div></td></tr></thead><tbody><tr><td>'+a.slice(c)+'</td></tr></tbody></table>';})() + '</body></html>';
+}
+// ---- Lazy jsPDF loader (vector PDF, selectable text) ----
+var _jspdfLoading = null;
+function ensureJsPdf(cb) {
+  if (window.jspdf && window.jspdf.jsPDF) { cb(); return; }
+  if (_jspdfLoading) { _jspdfLoading.push(cb); return; }
+  _jspdfLoading = [cb];
+  var sc = document.createElement("script");
+  sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+  sc.onload = function () { var q = _jspdfLoading; _jspdfLoading = null; q.forEach(function (f) { try { f(); } catch (e) {} }); };
+  sc.onerror = function () { var q = _jspdfLoading; _jspdfLoading = null; q.forEach(function (f) { try { f("load-failed"); } catch (e) {} }); };
+  document.head.appendChild(sc);
+}
+function _loadImg(b64, cb) { var im = new Image(); im.onload = function () { cb(im); }; im.onerror = function () { cb(null); }; im.src = "data:image/jpeg;base64," + b64; }
+function _imgFmt(mime) { return /png/i.test(mime || "") ? "PNG" : "JPEG"; }
+
+// Fallback: open the print-ready HTML report in a new tab.
+function printPdfWindow(proj, bhs, recs, figImg, photos) {
+  var w = window.open("", "_blank");
+  if (!w) { alert("Please allow pop-ups so the PDF can open, then click Download PDF again."); return; }
+  w.document.open(); w.document.write(buildReportHtml(proj, bhs, recs, figImg, photos)); w.document.close(); w.focus();
+  setTimeout(function () { try { w.print(); } catch (e) {} }, 500);
+}
+
+// Build a real, searchable (vector-text) PDF that mirrors the HTML report.
+function buildReportPdf(proj, bhs, recs, figImg, photos, logos) {
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({ unit: "pt", format: "letter" });
+  var NAVY = [20, 41, 77], INK = [34, 34, 34], MUTE = [95, 95, 95];
+  var PW = 612, PH = 792, ML = 54, MR = 558, CW = MR - ML, TOP = 92, BOTTOM = 748;
+  var y = TOP;
+
+  var engName = proj.engineer || "Tony Wang", engCred = proj.engCred || "P. Eng",
+      engTitle = proj.engTitle || "Principal Engineer", engPhone = proj.engPhone || "647-459-5647",
+      engEmail = proj.engEmail || "Twang@KingEPCM.com", siteAddr = proj.address || "[Site Address]";
+
+  function wm() {
+    doc.setFont("helvetica", "bold"); doc.setFontSize(180); doc.setTextColor(120, 124, 130);
+    var set = false; try { doc.setGState(new doc.GState({ opacity: 0.18 })); set = true; } catch (e) {}
+    var c = 0.70710678, tw = doc.getTextWidth("DRAFT"), h = 0.35 * 180;
+    doc.text("DRAFT", PW / 2 - c * (tw / 2 - h), PH / 2 + c * (tw / 2 + h), { angle: 45 });
+    if (set) { try { doc.setGState(new doc.GState({ opacity: 1 })); } catch (e) {} }
+  }
+  function header() {
+    var lg = logos && logos.cover;
+    if (lg && lg.naturalWidth) { try { var h = 32, w = h * (lg.naturalWidth / lg.naturalHeight); doc.addImage(lg, "JPEG", ML, 30, w, h); } catch (e) {} }
+    doc.setFont("times", "normal"); doc.setFontSize(9); doc.setTextColor(MUTE[0], MUTE[1], MUTE[2]);
+    doc.text("Geotechnical Report", MR, 34, { align: "right" });
+    doc.text("Soil Stratigraphy & Bearing Capacity", MR, 45, { align: "right" });
+    doc.text(siteAddr, MR, 56, { align: "right" });
+    doc.setDrawColor(205, 205, 205); doc.setLineWidth(0.8); doc.line(ML, 68, MR, 68);
+  }
+  function newPage() { doc.addPage(); wm(); header(); y = TOP; }
+  function need(h) { if (y + h > BOTTOM) newPage(); }
+  function body() { doc.setFont("times", "normal"); doc.setFontSize(11); doc.setTextColor(INK[0], INK[1], INK[2]); }
+  function para(text, opt) {
+    opt = opt || {}; body(); if (opt.bold) doc.setFont("times", "bold");
+    var ind = opt.indent || 0, x = ML + ind, lines = doc.splitTextToSize(String(text), CW - ind), lh = 14;
+    need(lines.length * lh); doc.text(lines, x, y); y += lines.length * lh + (opt.gap == null ? 7 : opt.gap);
+  }
+  function heading(text) {
+    need(30); doc.setFont("times", "bold"); doc.setFontSize(11.5); doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
+    doc.text(String(text), ML, y); var tw = doc.getTextWidth(String(text));
+    doc.setDrawColor(NAVY[0], NAVY[1], NAVY[2]); doc.setLineWidth(0.6); doc.line(ML, y + 2.5, ML + tw, y + 2.5);
+    y += 19;
+  }
+  function rows(list, indent) {
+    body(); indent = indent || 40; var kx = ML + indent, vx = kx + 92, lh = 14;
+    list.forEach(function (r) {
+      doc.setFont("times", "normal"); var vlines = doc.splitTextToSize(String(r.v), MR - vx);
+      need(Math.max(lh, vlines.length * lh));
+      doc.setFont("times", "bold"); doc.text(String(r.k), kx, y);
+      doc.setFont("times", "normal"); doc.text(vlines, vx, y);
+      y += vlines.length * lh + 2;
+    });
+    y += 4;
+  }
+  function bullets(items) {
+    body(); var x = ML + 24, lh = 14;
+    items.forEach(function (it) {
+      var lines = doc.splitTextToSize(String(it), CW - 24); need(lines.length * lh);
+      doc.text("•", ML + 12, y); doc.text(lines, x, y); y += lines.length * lh + 3;
+    });
+    y += 4;
+  }
+  function placeImage(src, fmt, natW, natH, maxH, caption) {
+    natW = natW || 800; natH = natH || 600; var w = CW, h = w * natH / natW;
+    if (h > maxH) { h = maxH; w = h * natW / natH; }
+    need(h + (caption ? 20 : 4)); var x = ML + (CW - w) / 2;
+    try { doc.addImage(src, fmt, x, y, w, h); } catch (e) {}
+    y += h + 4;
+    if (caption) { doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(MUTE[0], MUTE[1], MUTE[2]); var cl = doc.splitTextToSize(caption, CW); doc.text(cl, PW / 2, y + 6, { align: "center" }); y += cl.length * 12 + 6; }
+  }
+
+  // ---------- COVER ----------
+  wm();
+  doc.setDrawColor(229, 168, 35); doc.setLineWidth(3); doc.rect(36, 36, 540, 720);
+  doc.setLineWidth(1); doc.rect(41, 41, 530, 710);
+  if (logos && logos.cover && logos.cover.naturalWidth) { try { var clw = 150, clh = clw * (logos.cover.naturalHeight / logos.cover.naturalWidth); doc.addImage(logos.cover, "JPEG", 64, 62, clw, clh); } catch (e) {} }
+  doc.setFont("times", "normal"); doc.setFontSize(10.5); doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.text(["211-3780 14th Avenue", "Markham, ON L3R 9Y5", "T: 416-342-3001", "Info@KingEPCM.com", "www.KingEPCM.com"], 548, 72, { align: "right" });
+  var cyc = 300;
+  doc.setFont("times", "bold"); doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]); doc.setFontSize(23);
+  doc.text("Geotechnical Report", PW / 2, cyc, { align: "center" });
+  doc.text("Soil Bearing Capacity", PW / 2, cyc + 30, { align: "center" });
+  doc.setFont("times", "normal"); doc.setFontSize(15); doc.text("at", PW / 2, cyc + 55, { align: "center" });
+  doc.setFont("times", "bold"); doc.setFontSize(22);
+  var sa = doc.splitTextToSize(siteAddr, 430); doc.text(sa, PW / 2, cyc + 82, { align: "center" });
+  doc.setFont("times", "bold"); doc.setFontSize(12); doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.text("PREPARED:", PW / 2, 636, { align: "center" });
+  doc.setFont("times", "normal"); doc.text(String(fDate(proj.reportDate)), PW / 2, 652, { align: "center" });
+
+  // ---------- BODY ----------
+  newPage();
+  var bgDrilled = bhs.length > 1 ? "boreholes were" : "borehole was";
+  heading("Background");
+  para("A geotechnical investigation was conducted on " + fDate(proj.inspDate) + ", at " + siteAddr + ". The purpose of this investigation is to classify the in-situ soil and determine the allowable bearing pressure of the in-situ soil. The investigation is for a " + (proj.structureType ? proj.structureType.toLowerCase() : "proposed structure") + ". The " + bgDrilled + " drilled by a field technician of King EPCM, and the Engineer supervising the investigation is " + engName + ", " + engTitle + " of King EPCM.");
+
+  heading("Borehole location");
+  var bhIds = bhs.map(function (b) { return b.id; }).join(", ");
+  var bhCountWord = bhs.length === 1 ? "one borehole" : numWord(bhs.length) + " boreholes";
+  var bhVerb = bhs.length === 1 ? "was" : "were";
+  para("For this investigation, " + bhCountWord + " (" + bhIds + ") " + bhVerb + " drilled in " + (proj.bhLoc || "the investigation area") + ".");
+  if (figImg && figImg.b64) placeImage("data:" + figImg.mime + ";base64," + figImg.b64, _imgFmt(figImg.mime), figImg.w, figImg.h, 360, "Figure 1 - Location of boreholes at " + siteAddr);
+  else {
+    need(80); doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.8); doc.setLineDashPattern([3, 3], 0);
+    doc.rect(ML + 70, y, CW - 140, 54); doc.setLineDashPattern([], 0);
+    doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(150, 150, 150);
+    doc.text("[ Insert Figure 1 — site / borehole location image here ]", PW / 2, y + 30, { align: "center" });
+    y += 64; doc.setTextColor(MUTE[0], MUTE[1], MUTE[2]); doc.text("Figure 1 - Location of boreholes at " + siteAddr, PW / 2, y, { align: "center" }); y += 16;
+  }
+
+  heading("Method One – Soil Characterization using USCS.");
+  bhs.forEach(function (bh) {
+    para(bh.id + " was drilled down to " + (bh.depth || "?") + "m below grade. Generally, the soil is comprised of the following:");
+    para("Borehole " + bh.id + ":", { indent: 40, bold: true, gap: 2 });
+    var lrows = [];
+    bh.layers.forEach(function (l) { if (!l.soil) return; var desc = l.soil + (l.moisture ? ", " + l.moisture.toLowerCase() : ""); lrows.push({ k: l.from + " – " + l.to + " m:", v: desc }); });
+    if (bh.refusal) lrows.push({ k: bh.refusalDepth + " m:", v: "auger refusal" + (bh.refusalNote ? " due to " + bh.refusalNote : "") });
+    if (lrows.length) rows(lrows, 40);
+    var gwLine = bh.gwObs ? "Groundwater observed at " + bh.gwDepth + "m below grade" : "No groundwater within the top " + (bh.depth || "?") + "m";
+    para(gwLine, { indent: 40 });
+  });
+
+  var allT = []; bhs.forEach(function (b) { allT = allT.concat(b.tests); });
+  var hasDCP = allT.some(function (t) { return t.type === "DCP"; }), hasSCP = allT.some(function (t) { return t.type === "SCP"; }), hasSV = allT.some(function (t) { return t.type === "SV"; });
+  var tNames = []; if (hasSCP) tNames.push("Static cone penetrometer tests"); if (hasDCP) tNames.push("Dynamic cone penetration tests"); if (hasSV) tNames.push("Shear vane tests");
+  heading("Method Two – " + (tNames.length ? joinAnd(tNames) : "In-situ Tests"));
+  bhs.forEach(function (bh) {
+    if (!bh.tests.length) return;
+    para(bh.id, { gap: 2 });
+    para("The following in-situ tests were conducted to evaluate the bearing capacity:", { gap: 2 });
+    var trows = [];
+    bh.tests.forEach(function (t) {
+      var line;
+      if (t.type === "SCP") { line = t.resistance + "kPa resistance with " + (t.movement || "no movement"); }
+      else if (t.type === "DCP") { var dpi = (t.blows && t.pen) ? calcDPI(+t.blows, +t.pen) : null; var N = dpi ? +calcN(calcSPT(dpi)).toFixed(0) : null; line = t.blows + " blows and " + t.pen + "cm penetration" + (N ? " (N ~ " + N + " blows/300mm)" : ""); }
+      else { var Su = t.torque ? calcSu(+t.torque, t.vaneIdx) : null; var SuF = (Su && t.PI) ? calcBjj(Su, +t.PI) : Su; line = "Shear vane (" + VANES[t.vaneIdx].name + ") – Su = " + (SuF || "?") + " kPa" + (t.PI ? " (Bjerrum corrected, PI = " + t.PI + ")" : ""); }
+      trows.push({ k: t.depth + "m:", v: line });
+    });
+    rows(trows, 40);
+  });
+
+  heading("Summary");
+  var scope = proj.structureType ? proj.structureType.toLowerCase() : "proposed structure";
+  if (proj.alsoDesignedFor) scope += " and " + proj.alsoDesignedFor;
+  para("Based on the above field-testing results, the following parameters may be used for the design of the " + scope + ":");
+  var sb = [];
+  if (recs.sls) sb.push("Bearing capacity SLS = " + recs.sls + "kPa");
+  if (recs.uls) sb.push("Bearing capacity ULS = " + recs.uls + "kPa");
+  if (recs.Su) sb.push("Undrained shear strength = " + recs.Su + "kPa");
+  var anyGW = bhs.some(function (b) { return b.gwObs; });
+  var maxD = Math.max.apply(null, [0].concat(bhs.map(function (b) { return parseFloat(b.depth) || 0; })));
+  sb.push(anyGW ? "Groundwater was observed during this investigation – refer to borehole logs for details" : "No groundwater within the top " + (maxD || "?") + "m");
+  if (recs.notes) sb.push(recs.notes);
+  bullets(sb);
+  para("For questions or concerns regarding this report, please contact " + engName + ", " + engCred + " at " + engPhone + " or " + engEmail + ". This report is an intellectual property of King EPCM, and may only be used and relied upon by the property owner, its designers, engineers, or other personnel related to the project.");
+  para("Sincerely,", { gap: 18 });
+  need(64);
+  doc.setDrawColor(120, 120, 120); doc.setLineWidth(0.8); doc.line(ML, y, ML + 210, y); y += 14;
+  doc.setFont("times", "bold"); doc.setFontSize(11); doc.setTextColor(INK[0], INK[1], INK[2]); doc.text(engName + ", " + engCred, ML, y); y += 14;
+  doc.setFont("times", "normal"); doc.text(engTitle, ML, y); y += 14; doc.text("King EPCM", ML, y); y += 14;
+
+  var _ph = (photos || []).filter(function (p) { return p && p.img && p.img.b64; });
+  if (_ph.length) {
+    newPage(); heading("Appendix A – Site Photos");
+    var cellW = (CW - 16) / 2, colX = [ML, ML + cellW + 16], col = 0, rowTop = y, rowMaxH = 0;
+    _ph.forEach(function (p) {
+      var natW = p.img.w || 800, natH = p.img.h || 600, w = cellW, h = w * natH / natW; if (h > 300) { h = 300; w = h * natW / natH; }
+      doc.setFont("times", "italic"); doc.setFontSize(9.5);
+      var cl = doc.splitTextToSize(p.desc || "", cellW), blockH = h + cl.length * 11 + 8;
+      if (col === 0) { need(blockH); rowTop = y; rowMaxH = 0; }
+      var x = colX[col] + (cellW - w) / 2;
+      try { doc.addImage("data:" + p.img.mime + ";base64," + p.img.b64, _imgFmt(p.img.mime), x, rowTop, w, h); } catch (e) {}
+      doc.setTextColor(MUTE[0], MUTE[1], MUTE[2]); doc.text(cl, colX[col] + cellW / 2, rowTop + h + 11, { align: "center" });
+      if (blockH > rowMaxH) rowMaxH = blockH;
+      col++; if (col === 2) { col = 0; y = rowTop + rowMaxH + 10; }
+    });
+    if (col === 1) y = rowTop + rowMaxH + 10;
+    need(16); doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(MUTE[0], MUTE[1], MUTE[2]); doc.text("Figure 2 - Site Photos", PW / 2, y, { align: "center" }); y += 14;
+  }
+
+  return doc;
+}
+
+function downloadPdf(proj, bhs, recs, figImg, photos) {
+  ensureJsPdf(function (err) {
+    if (err || !(window.jspdf && window.jspdf.jsPDF)) { printPdfWindow(proj, bhs, recs, figImg, photos); return; }
+    var pending = 2, logos = {};
+    function go() {
+      try {
+        var doc = buildReportPdf(proj, bhs, recs, figImg, photos, logos);
+        var addr = (proj && proj.address) || "Site";
+        var fn = "DRAFT - Geotechnical Report - " + String(addr).replace(/[\\/:*?"<>|]+/g, " ").trim().slice(0, 80) + ".pdf";
+        doc.save(fn);
+      } catch (e) { printPdfWindow(proj, bhs, recs, figImg, photos); }
+    }
+    _loadImg(LOGO_COVER_B64, function (im) { logos.cover = im; if (--pending === 0) go(); });
+    _loadImg(LOGO_HEADER_B64, function (im) { logos.header = im; if (--pending === 0) go(); });
+  });
+}
+
+// ── Appendix: site photos (Word) ──
+function figEmuCell(img) {
+  var maxW = 2850000,
+    maxH = 3400000;
+  var w = img.w || 1200,
+    h = img.h || 900;
+  var cx = maxW,
+    cy = Math.round(maxW * h / w);
+  if (cy > maxH) {
+    cy = maxH;
+    cx = Math.round(maxH * w / h);
+  }
+  return {
+    cx: cx,
+    cy: cy
+  };
+}
+function appendixDocx(photos) {
+  var has = (photos || []).filter(function (p) {
+    return p && p.img && p.img.b64;
+  });
+  if (!has.length) return "";
+  var cells = [];
+  for (var i = 0; i < photos.length; i++) {
+    var p = photos[i];
+    if (!(p && p.img && p.img.b64)) continue;
+    var d = figEmuCell(p.img);
+    var id = 400 + i;
+    var img = '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing>' + '<wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="' + d.cx + '" cy="' + d.cy + '"/><wp:effectExtent l="0" t="0" r="0" b="0"/>' + '<wp:docPr id="' + id + '" name="Photo' + (i + 1) + '"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>' + '<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' + '<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="' + id + '" name="Photo' + (i + 1) + '"/><pic:cNvPicPr/></pic:nvPicPr>' + '<pic:blipFill><a:blip r:embed="rIdPhoto' + (i + 1) + '"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>' + '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + d.cx + '" cy="' + d.cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>' + '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
+    var cap = P(run(p.desc || "Photo " + (i + 1), {
+      size: 18
+    }), {
+      jc: "center",
+      after: 120
+    });
+    cells.push('<w:tc><w:tcPr><w:tcW w:w="4986" w:type="dxa"/></w:tcPr>' + img + cap + '</w:tc>');
+  }
+  var rows = "";
+  for (var r = 0; r < cells.length; r += 2) {
+    rows += '<w:tr>' + cells[r] + (cells[r + 1] || '<w:tc><w:tcPr><w:tcW w:w="4986" w:type="dxa"/></w:tcPr><w:p/></w:tc>') + '</w:tr>';
+  }
+  var tbl = '<w:tbl><w:tblPr><w:tblW w:w="9972" w:type="dxa"/><w:jc w:val="center"/><w:tblLook w:val="04A0"/></w:tblPr><w:tblGrid><w:gridCol w:w="4986"/><w:gridCol w:w="4986"/></w:tblGrid>' + rows + '</w:tbl>';
+  return '<w:p><w:r><w:br w:type="page"/></w:r></w:p>' + wHead("Appendix A \u2013 Site Photos") + wBlank() + tbl + P(run("Figure 2 - Site Photos"), {
+    style: "Caption",
+    jc: "center"
+  });
+}
+function App() {
+  const [tab, setTab] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [gen, setGen] = useState(false);
+  useEffect(() => {
+    if (window.JSZip) {
+      setReady(true);
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+    s.onload = () => setReady(true);
+    s.onerror = () => console.error("JSZip failed to load");
+    document.head.appendChild(s);
+  }, []);
+  const [proj, setProj] = useState({
+    address: "",
+    inspDate: new Date().toISOString().split("T")[0],
+    reportDate: new Date().toISOString().split("T")[0],
+    structureType: "Proposed residential dwelling",
+    bhLoc: "the existing property's backyard",
+    engineer: "Tony Wang",
+    engCred: "P. Eng",
+    engTitle: "Principal Engineer",
+    engPhone: "647-459-5647",
+    engEmail: "Twang@KingEPCM.com",
+    alsoDesignedFor: "",
+    showSignature: true
+  });
+  const sp = (k, v) => setProj(p => ({
+    ...p,
+    [k]: v
+  }));
+  const [bhs, setBhs] = useState([mkBH(1)]);
+  const addBH = () => setBhs(b => [...b, mkBH(b.length + 1)]);
+  const rmBH = i => setBhs(b => b.filter((_, j) => j !== i));
+  const upBH = (i, k, v) => setBhs(b => b.map((h, j) => j === i ? {
+    ...h,
+    [k]: v
+  } : h));
+  const addL = i => setBhs(b => b.map((h, j) => j === i ? {
+    ...h,
+    layers: [...h.layers, mkLayer()]
+  } : h));
+  const rmL = (i, li) => setBhs(b => b.map((h, j) => j === i ? {
+    ...h,
+    layers: h.layers.filter((_, k) => k !== li)
+  } : h));
+  const upL = (i, li, k, v) => setBhs(b => b.map((h, j) => j === i ? {
+    ...h,
+    layers: h.layers.map((l, m) => m === li ? {
+      ...l,
+      [k]: v
+    } : l)
+  } : h));
+  const addT = (i, t) => setBhs(b => b.map((h, j) => j === i ? {
+    ...h,
+    tests: [...h.tests, t]
+  } : h));
+  const rmT = (i, ti) => setBhs(b => b.map((h, j) => j === i ? {
+    ...h,
+    tests: h.tests.filter((_, k) => k !== ti)
+  } : h));
+  const upT = (i, ti, k, v) => setBhs(b => b.map((h, j) => j === i ? {
+    ...h,
+    tests: h.tests.map((t, m) => m === ti ? {
+      ...t,
+      [k]: v
+    } : t)
+  } : h));
+  const [ft, setFt] = useState({
+    B: "0.6",
+    L: "0.6",
+    D: "0.6",
+    gamma: "18",
+    qs: ""
+  });
+  const sf = (k, v) => setFt(f => ({
+    ...f,
+    [k]: v
+  }));
+  const [recs, setRecs] = useState({
+    sls: "",
+    uls: "",
+    Su: "",
+    notes: ""
+  });
+  const sr = (k, v) => setRecs(r => ({
+    ...r,
+    [k]: v
+  }));
+  const [figImg, setFigImg] = useState(null);
+  const [preview, setPreview] = useState(false);
+  const [photos, setPhotos] = useState([{
+    img: null,
+    desc: ""
+  }, {
+    img: null,
+    desc: ""
+  }, {
+    img: null,
+    desc: ""
+  }, {
+    img: null,
+    desc: ""
+  }]);
+  const onPhoto = (idx, file) => {
+    if (!file) {
+      setPhotos(ps => ps.map((p, i) => i === idx ? {
+        ...p,
+        img: null
+      } : p));
+      return;
+    }
+    const fr = new FileReader();
+    fr.onload = () => {
+      const url = String(fr.result || "");
+      const c = url.indexOf(",");
+      const b64 = c >= 0 ? url.slice(c + 1) : url;
+      const mime = (url.match(/^data:([^;]+)/) || [])[1] || "image/jpeg";
+      const im = new Image();
+      const done = (w, hh) => setPhotos(ps => ps.map((p, i) => i === idx ? {
+        ...p,
+        img: {
+          b64: b64,
+          mime: mime,
+          w: w,
+          h: hh
+        }
+      } : p));
+      im.onload = () => done(im.naturalWidth || 1200, im.naturalHeight || 900);
+      im.onerror = () => done(1200, 900);
+      im.src = url;
+    };
+    fr.readAsDataURL(file);
+  };
+  const setPhotoDesc = (idx, v) => setPhotos(ps => ps.map((p, i) => i === idx ? {
+    ...p,
+    desc: v
+  } : p));
+  const onFig = file => {
+    if (!file) {
+      setFigImg(null);
+      return;
+    }
+    const fr = new FileReader();
+    fr.onload = () => {
+      const url = String(fr.result || "");
+      const c = url.indexOf(",");
+      const b64 = c >= 0 ? url.slice(c + 1) : url;
+      const mime = (url.match(/^data:([^;]+)/) || [])[1] || "image/jpeg";
+      const im = new Image();
+      im.onload = () => setFigImg({
+        b64: b64,
+        mime: mime,
+        w: im.naturalWidth || 1200,
+        h: im.naturalHeight || 800,
+        name: file.name || "figure1"
+      });
+      im.onerror = () => setFigImg({
+        b64: b64,
+        mime: mime,
+        w: 1200,
+        h: 800,
+        name: file.name || "figure1"
+      });
+      im.src = url;
+    };
+    fr.readAsDataURL(file);
+  };
+
+  // Derived calcs
+  const allT = bhs.flatMap(b => b.tests);
+  const dcps = allT.filter(t => t.type === "DCP" && t.blows && t.pen);
+  const svs = allT.filter(t => t.type === "SV" && t.torque);
+  const Ns = dcps.map(t => {
+    const d = calcDPI(+t.blows, +t.pen);
+    const s = d ? calcSPT(d) : null;
+    return s ? +calcN(s).toFixed(1) : null;
+  }).filter(Boolean);
+  const Nmin = Ns.length > 0 ? Math.min(...Ns) : null;
+  const Sus = svs.map(t => {
+    const s = calcSu(+t.torque, t.vaneIdx);
+    return t.PI ? calcBjj(s, +t.PI) : s;
+  });
+  const SuMin = Sus.length > 0 ? Math.min(...Sus) : null;
+  const B = parseFloat(ft.B) || 0.6,
+    L = parseFloat(ft.L) || 0.6,
+    D = parseFloat(ft.D) || 0.6;
+  const gam = parseFloat(ft.gamma) || 18,
+    qs = ft.qs ? parseFloat(ft.qs) : gam * D;
+  const mey = Nmin ? calcMeyerhof(Nmin, B, D) : null;
+  const bow = Nmin ? calcBowles(Nmin, B, D) : null;
+  const phi = Nmin ? calcPhi(Nmin) : null;
+  const tzN = Nmin && phi ? +(calcTerz(0, phi, gam, B, L, D, qs) / 3).toFixed(1) : null;
+  const tzSu = SuMin ? +(calcTerz(SuMin, 0, gam, B, L, D, qs) / 3).toFixed(1) : null;
+  const opts = [mey, bow, tzN, tzSu].filter(Boolean);
+  const sugSLS = opts.length > 0 ? Math.min(...opts) : null;
+  const download = async () => {
+    if (!ready) {
+      alert("Library loading, try again shortly.");
+      return;
+    }
+    setGen(true);
+    try {
+      const blob = await buildDocx(proj, bhs, recs, figImg, photos);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "DRAFT_Geotech_" + (proj.address || "Site").replace(/[^a-zA-Z0-9]/g, "_") + "_" + (proj.reportDate || "draft") + ".docx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert("Error: " + e.message);
+    }
+    setGen(false);
+  };
+
+  // ── Shared styles ──
+  const I = {
+    padding: "10px 12px",
+    border: "1px solid var(--border-color)",
+    borderRadius: 9,
+    fontSize: "0.95rem",
+    background: "var(--bg-primary)",
+    color: "var(--text-primary)",
+    width: "100%",
+    boxSizing: "border-box"
+  };
+  const CD = {
+    background: "var(--bg-primary)",
+    border: "1px solid var(--border-color)",
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 14
+  };
+  const LB = {
+    display: "block",
+    fontSize: "0.9rem",
+    fontWeight: "700",
+    color: "var(--text-secondary)",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em"
+  };
+  const SH = {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#14294D",
+    marginBottom: 12,
+    paddingBottom: 6,
+    borderBottom: "2px solid #dce8ff"
+  };
+  const R2 = {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 12,
+    marginBottom: 12
+  };
+  const BB = bg => ({
+    width: "100%",
+    padding: 13,
+    border: "none",
+    borderRadius: 10,
+    fontSize: 15,
+    fontWeight: "700",
+    cursor: "pointer",
+    background: bg,
+    color: "white",
+    marginBottom: 10
+  });
+  // Uniform action-button style (matches the other builders)
+  const GB = bg => ({ border: 0, borderRadius: 8, padding: "11px 20px", fontSize: "0.95rem", fontWeight: "700", cursor: "pointer", background: bg, color: "#fff", lineHeight: 1.1 });
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "system-ui,-apple-system,sans-serif",
+      maxWidth: 1040,
+      margin: "0",
+      background: "var(--bg-primary)"
+    }
+  }, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      background: "#f0f4fa",
+      borderBottom: "2px solid #dde4f0"
+    }
+  }, [["📋", "Project"], ["🔩", "Boreholes"], ["📊", "Calculations"], ["📄", "Generate"]].map(([ic, lb], i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => setTab(i),
+    style: {
+      flex: 1,
+      padding: "10px 4px",
+      border: "none",
+      cursor: "pointer",
+      background: tab === i ? "white" : "transparent",
+      borderBottom: "3px solid " + (tab === i ? "#14294D" : "transparent"),
+      color: tab === i ? "#14294D" : "#888",
+      fontSize: 11,
+      fontWeight: tab === i ? "700" : "400",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 2
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18
+    }
+  }, ic), /*#__PURE__*/React.createElement("span", null, lb)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "16px 12px 40px"
+    }
+  }, tab === 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: CD
+  }, /*#__PURE__*/React.createElement("div", {
+    style: SH
+  }, "📍 Site Information"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Site Address"), /*#__PURE__*/React.createElement("input", {
+    style: {
+      ...I,
+      fontSize: 15
+    },
+    value: proj.address,
+    onChange: e => sp("address", e.target.value),
+    placeholder: "e.g. 6 Coates Hill Ct, Bolton",
+    "data-twproject": true
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#999",
+      marginTop: 3
+    }
+  }, "Appears on the cover, running header, and throughout the report.")), /*#__PURE__*/React.createElement("div", {
+    style: R2
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Inspection Date"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    style: I,
+    value: proj.inspDate,
+    onChange: e => sp("inspDate", e.target.value)
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Report Date"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    style: I,
+    value: proj.reportDate,
+    onChange: e => sp("reportDate", e.target.value)
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Structure Type"), /*#__PURE__*/React.createElement("select", {
+    style: I,
+    value: proj.structureType,
+    onChange: e => sp("structureType", e.target.value)
+  }, STRUCTS.map(s => /*#__PURE__*/React.createElement("option", {
+    key: s
+  }, s)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Borehole Location Description"), /*#__PURE__*/React.createElement("input", {
+    style: I,
+    value: proj.bhLoc,
+    onChange: e => sp("bhLoc", e.target.value),
+    placeholder: "the existing property's backyard"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Also Designed For (optional)"), /*#__PURE__*/React.createElement("input", {
+    style: I,
+    value: proj.alsoDesignedFor,
+    onChange: e => sp("alsoDesignedFor", e.target.value),
+    placeholder: "e.g. temporary shoring structures"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#999",
+      marginTop: 3
+    }
+  }, "Added to the Summary scope line: \"…design of the ", proj.structureType.toLowerCase(), proj.alsoDesignedFor ? " and " + proj.alsoDesignedFor : "", ":\""))), /*#__PURE__*/React.createElement("div", {
+    style: CD
+  }, /*#__PURE__*/React.createElement("div", {
+    style: SH
+  }, "👷 Engineering Team"), /*#__PURE__*/React.createElement("div", {
+    style: R2
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Engineer Name"), /*#__PURE__*/React.createElement("input", {
+    style: I,
+    value: proj.engineer,
+    onChange: e => sp("engineer", e.target.value),
+    placeholder: "Tony Wang"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Credential"), /*#__PURE__*/React.createElement("input", {
+    style: I,
+    value: proj.engCred,
+    onChange: e => sp("engCred", e.target.value),
+    placeholder: "P. Eng"
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Title"), /*#__PURE__*/React.createElement("input", {
+    style: I,
+    value: proj.engTitle,
+    onChange: e => sp("engTitle", e.target.value),
+    placeholder: "Principal Engineer"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: R2
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Direct Phone"), /*#__PURE__*/React.createElement("input", {
+    style: I,
+    value: proj.engPhone,
+    onChange: e => sp("engPhone", e.target.value),
+    placeholder: "647-459-5647"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Direct Email"), /*#__PURE__*/React.createElement("input", {
+    style: I,
+    value: proj.engEmail,
+    onChange: e => sp("engEmail", e.target.value),
+    placeholder: "Twang@KingEPCM.com"
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#999",
+      marginTop: -4,
+      marginBottom: 10
+    }
+  }, "Direct phone & email are used in the closing disclaimer."), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      cursor: "pointer",
+      fontSize: 13,
+      color: "var(--text-primary)"
+    }
+  }, "✓ A signature block is included automatically on this report.")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setTab(1),
+    style: BB("#14294D")
+  }, "Next: Enter Borehole Data →")), tab === 1 && /*#__PURE__*/React.createElement("div", null, bhs.map((bh, bi) => /*#__PURE__*/React.createElement("div", {
+    key: bi,
+    style: {
+      ...CD,
+      padding: 0,
+      overflow: "hidden",
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#14294D",
+      color: "white",
+      padding: "11px 15px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: bh.id,
+    onChange: e => upBH(bi, "id", e.target.value),
+    style: {
+      fontSize: 18,
+      fontWeight: "800",
+      color: "white",
+      background: "rgba(255,255,255,0.15)",
+      border: "1px solid rgba(255,255,255,0.3)",
+      borderRadius: 6,
+      padding: "4px 10px",
+      width: 88
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      background: "rgba(255,255,255,0.12)",
+      borderRadius: 6,
+      padding: "5px 10px"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      opacity: 0.85
+    }
+  }, "Depth:"), /*#__PURE__*/React.createElement("input", {
+    value: bh.depth,
+    onChange: e => upBH(bi, "depth", e.target.value),
+    placeholder: "?",
+    style: {
+      width: 46,
+      background: "transparent",
+      border: "none",
+      color: "white",
+      fontSize: 16,
+      fontWeight: "700",
+      outline: "none"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      opacity: 0.85
+    }
+  }, "m"))), bhs.length > 1 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => rmBH(bi),
+    style: {
+      background: "rgba(255,255,255,0.15)",
+      border: "none",
+      color: "white",
+      borderRadius: 6,
+      padding: "6px 12px",
+      cursor: "pointer",
+      fontSize: 12
+    }
+  }, "Remove")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 0,
+      borderBottom: "1px solid var(--border-color)",
+      marginBottom: 14
+    }
+  }, [{
+    fl: "gwObs",
+    dk: "gwDepth",
+    ic: "💧",
+    lb: "Groundwater",
+    cl: "#1565c0",
+    no: "Not observed"
+  }, {
+    fl: "refusal",
+    dk: "refusalDepth",
+    ic: "⛔",
+    lb: "Auger Refusal",
+    cl: "#c0392b",
+    no: "Not encountered"
+  }].map(({
+    fl,
+    dk,
+    ic,
+    lb,
+    cl,
+    no
+  }, fi) => /*#__PURE__*/React.createElement("div", {
+    key: fi,
+    style: {
+      padding: "10px 12px",
+      borderRight: fi === 0 ? "1px solid var(--border-color)" : "none"
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "flex-start",
+      gap: 8,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: bh[fl],
+    onChange: e => upBH(bi, fl, e.target.checked),
+    style: {
+      width: 18,
+      height: 18,
+      marginTop: 2,
+      cursor: "pointer"
+    }
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: "700",
+      fontSize: 13,
+      color: cl
+    }
+  }, ic, " ", lb), bh[fl] ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      alignItems: "center",
+      marginTop: 4,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "at"), /*#__PURE__*/React.createElement("input", {
+    value: bh[dk],
+    onChange: e => upBH(bi, dk, e.target.value),
+    placeholder: "?",
+    style: {
+      width: 48,
+      padding: "3px 6px",
+      border: "1px solid #ccc",
+      borderRadius: 4,
+      fontSize: 13,
+      fontWeight: "700",
+      textAlign: "center"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "m"), fl === "refusal" && /*#__PURE__*/React.createElement("input", {
+    value: bh.refusalNote,
+    onChange: e => upBH(bi, "refusalNote", e.target.value),
+    placeholder: "reason",
+    style: {
+      width: 100,
+      padding: "3px 6px",
+      border: "1px solid #ccc",
+      borderRadius: 4,
+      fontSize: 11
+    }
+  })) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#aaa",
+      marginTop: 2
+    }
+  }, no)))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: "#888",
+      textTransform: "uppercase",
+      marginBottom: 8
+    }
+  }, "Soil Layers — Method One"), bh.layers.map((l, li) => /*#__PURE__*/React.createElement("div", {
+    key: li,
+    style: {
+      display: "flex",
+      gap: 6,
+      marginBottom: 6,
+      alignItems: "center",
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: l.from,
+    onChange: e => upL(bi, li, "from", e.target.value),
+    placeholder: "0",
+    style: {
+      ...I,
+      width: 52,
+      textAlign: "center",
+      fontSize: 13,
+      fontWeight: "700"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: "#888"
+    }
+  }, "–"), /*#__PURE__*/React.createElement("input", {
+    value: l.to,
+    onChange: e => upL(bi, li, "to", e.target.value),
+    placeholder: "0.5",
+    style: {
+      ...I,
+      width: 52,
+      textAlign: "center",
+      fontSize: 13,
+      fontWeight: "700"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "m"), /*#__PURE__*/React.createElement("input", {
+    value: l.soil,
+    onChange: e => upL(bi, li, "soil", e.target.value),
+    placeholder: "Soil description (USCS)",
+    style: {
+      ...I,
+      flex: 1,
+      minWidth: 180,
+      fontSize: 12
+    }
+  }), /*#__PURE__*/React.createElement("select", {
+    value: l.moisture,
+    onChange: e => upL(bi, li, "moisture", e.target.value),
+    style: {
+      ...I,
+      width: 88,
+      fontSize: 12
+    }
+  }, MOISTURE.map(m => /*#__PURE__*/React.createElement("option", {
+    key: m
+  }, m))), bh.layers.length > 1 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => rmL(bi, li),
+    style: {
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: "#ccc",
+      fontSize: 18,
+      padding: 0
+    }
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => addL(bi),
+    style: {
+      padding: "6px 12px",
+      background: "transparent",
+      border: "1px dashed #b0c8f0",
+      borderRadius: 6,
+      fontSize: 12,
+      color: "#4a90d9",
+      cursor: "pointer",
+      marginTop: 4
+    }
+  }, "+ Add Layer")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: "#888",
+      textTransform: "uppercase",
+      marginBottom: 8
+    }
+  }, "In-Situ Tests — Method Two"), bh.tests.map((t, ti) => /*#__PURE__*/React.createElement("div", {
+    key: ti,
+    style: {
+      background: "#f7f9ff",
+      borderRadius: 8,
+      padding: "10px 12px",
+      marginBottom: 8,
+      border: "1.5px solid " + TC[t.type] + "44"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: "700",
+      fontSize: 12,
+      color: TC[t.type]
+    }
+  }, TL[t.type]), /*#__PURE__*/React.createElement("button", {
+    onClick: () => rmT(bi, ti),
+    style: {
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: "#ccc",
+      fontSize: 16
+    }
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      flexWrap: "wrap",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "Depth:"), /*#__PURE__*/React.createElement("input", {
+    value: t.depth,
+    onChange: e => upT(bi, ti, "depth", e.target.value),
+    placeholder: "m",
+    style: {
+      ...I,
+      width: 68,
+      fontSize: 13,
+      fontWeight: "700",
+      textAlign: "center"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "m")), t.type === "SCP" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "Resistance:"), /*#__PURE__*/React.createElement("input", {
+    value: t.resistance,
+    onChange: e => upT(bi, ti, "resistance", e.target.value),
+    placeholder: "kPa",
+    style: {
+      ...I,
+      width: 88,
+      fontSize: 13,
+      fontWeight: "700"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "kPa")), /*#__PURE__*/React.createElement("input", {
+    value: t.movement,
+    onChange: e => upT(bi, ti, "movement", e.target.value),
+    placeholder: "e.g. less than 0.5cm of movement",
+    style: {
+      ...I,
+      flex: 1,
+      minWidth: 140,
+      fontSize: 12
+    }
+  })), t.type === "DCP" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "Blows:"), /*#__PURE__*/React.createElement("input", {
+    value: t.blows,
+    onChange: e => upT(bi, ti, "blows", e.target.value),
+    style: {
+      ...I,
+      width: 58,
+      fontSize: 13,
+      fontWeight: "700",
+      textAlign: "center"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "Pen (cm):"), /*#__PURE__*/React.createElement("input", {
+    value: t.pen,
+    onChange: e => upT(bi, ti, "pen", e.target.value),
+    placeholder: "cm",
+    style: {
+      ...I,
+      width: 66,
+      fontSize: 13,
+      fontWeight: "700",
+      textAlign: "center"
+    }
+  })), t.blows && t.pen && (() => {
+    const d = calcDPI(+t.blows, +t.pen);
+    const s = d ? calcSPT(d) : null;
+    return /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: "#2196f3",
+        fontWeight: "700"
+      }
+    }, "→ N ≈ ", s ? +calcN(s).toFixed(0) : "?", " blows/300mm");
+  })()), t.type === "SV" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("select", {
+    value: t.vaneIdx,
+    onChange: e => upT(bi, ti, "vaneIdx", +e.target.value),
+    style: {
+      ...I,
+      width: 90,
+      fontSize: 12
+    }
+  }, VANES.map((v, vi) => /*#__PURE__*/React.createElement("option", {
+    key: vi,
+    value: vi
+  }, v.name))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "T (N·m):"), /*#__PURE__*/React.createElement("input", {
+    value: t.torque,
+    onChange: e => upT(bi, ti, "torque", e.target.value),
+    placeholder: "N·m",
+    style: {
+      ...I,
+      width: 76,
+      fontSize: 13,
+      fontWeight: "700",
+      textAlign: "center"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "PI (opt):"), /*#__PURE__*/React.createElement("input", {
+    value: t.PI,
+    onChange: e => upT(bi, ti, "PI", e.target.value),
+    placeholder: "—",
+    style: {
+      ...I,
+      width: 55,
+      fontSize: 12,
+      textAlign: "center"
+    }
+  })), t.torque && (() => {
+    const su = calcSu(+t.torque, t.vaneIdx);
+    const sfv = t.PI ? calcBjj(su, +t.PI) : su;
+    return /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: "#ff9800",
+        fontWeight: "700"
+      }
+    }, "→ Su = ", sfv, " kPa", t.PI ? " (corrected)" : "");
+  })())))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      marginTop: 6,
+      flexWrap: "wrap"
+    }
+  }, [["DCP", mkDCP], ["SCP", mkSCP], ["SV", mkSV]].map(([tp, mk]) => /*#__PURE__*/React.createElement("button", {
+    key: tp,
+    onClick: () => addT(bi, mk()),
+    style: {
+      padding: "7px 14px",
+      background: TC[tp],
+      border: "none",
+      borderRadius: 6,
+      color: "white",
+      fontSize: 12,
+      fontWeight: "700",
+      cursor: "pointer"
+    }
+  }, "+ ", tp === "SV" ? "Shear Vane" : tp))))))), /*#__PURE__*/React.createElement("button", {
+    onClick: addBH,
+    style: BB("#27ae60")
+  }, "+ Add Borehole"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setTab(2),
+    style: BB("#14294D")
+  }, "Next: Calculations →")), tab === 2 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: CD
+  }, /*#__PURE__*/React.createElement("div", {
+    style: SH
+  }, "🏗 Footing Parameters"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(5,1fr)",
+      gap: 10,
+      marginBottom: 10
+    }
+  }, [["B (m)", "B", "Width"], ["L (m)", "L", "Length"], ["D — USF (m)", "D", "Depth"], ["γ (kN/m³)", "gamma", "Unit wt"], ["qs (kPa)", "qs", "Blank = γ×D"]].map(([lb, k, hint]) => /*#__PURE__*/React.createElement("div", {
+    key: k
+  }, /*#__PURE__*/React.createElement("label", {
+    style: LB,
+    title: hint
+  }, lb), /*#__PURE__*/React.createElement("input", {
+    style: I,
+    value: ft[k],
+    onChange: e => sf(k, e.target.value),
+    placeholder: k === "qs" ? "auto" : ft[k]
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "qs used = ", ft.qs || "γ×D = " + (gam * D).toFixed(1), " kPa", phi ? "  |  φ(N) = " + phi.toFixed(1) + "°" : "")), /*#__PURE__*/React.createElement("div", {
+    style: CD
+  }, /*#__PURE__*/React.createElement("div", {
+    style: SH
+  }, "📐 Bearing Capacity — All Methods"), !Nmin && !SuMin && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 12,
+      background: "#fff8e1",
+      borderRadius: 6,
+      fontSize: 13,
+      color: "#795548"
+    }
+  }, "Enter test data in the Boreholes tab to see calculated values."), Nmin && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: "700",
+      fontSize: 13,
+      color: "#14294D",
+      marginBottom: 8
+    }
+  }, "From DCP  ·  N_min = ", Nmin.toFixed(1), " blows/300mm  ·  φ = ", phi?.toFixed(1), "°"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr",
+      gap: 10
+    }
+  }, [["Meyerhof", mey], ["Bowles", bow], ["Terzaghi (N→φ)", tzN]].map(([nm, v]) => v && /*#__PURE__*/React.createElement("div", {
+    key: nm,
+    style: {
+      background: "#f0f4ff",
+      borderRadius: 8,
+      padding: "10px 14px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#888",
+      textTransform: "uppercase"
+    }
+  }, nm), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 24,
+      fontWeight: "800",
+      color: "#14294D"
+    }
+  }, v), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "kPa SLS"))))), SuMin && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: "700",
+      fontSize: 13,
+      color: "#e07800",
+      marginBottom: 8
+    }
+  }, "From Shear Vane  ·  Su_min = ", SuMin, " kPa"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff8f0",
+      borderRadius: 8,
+      padding: "10px 14px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#888",
+      textTransform: "uppercase"
+    }
+  }, "Terzaghi (φ=0, FS=3)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 24,
+      fontWeight: "800",
+      color: "#e07800"
+    }
+  }, tzSu || "?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "kPa SLS")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff8f0",
+      borderRadius: 8,
+      padding: "10px 14px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#888",
+      textTransform: "uppercase"
+    }
+  }, "Undrained Su"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 24,
+      fontWeight: "800",
+      color: "#e07800"
+    }
+  }, SuMin), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "kPa")))), sugSLS && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#e8f5e9",
+      border: "1px solid #4caf50",
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#2e7d32",
+      fontWeight: "700",
+      marginBottom: 4
+    }
+  }, "Conservative suggestion (minimum of all methods)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: "800",
+      color: "#2e7d32"
+    }
+  }, sugSLS, " kPa SLS  →  ", +(sugSLS * 1.5).toFixed(0), " kPa ULS"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      sr("sls", String(sugSLS));
+      sr("uls", String(+(sugSLS * 1.5).toFixed(0)));
+    },
+    style: {
+      marginTop: 8,
+      padding: "6px 14px",
+      background: "#2e7d32",
+      border: "none",
+      borderRadius: 6,
+      color: "white",
+      fontSize: 12,
+      fontWeight: "700",
+      cursor: "pointer"
+    }
+  }, "Apply to Report"))), /*#__PURE__*/React.createElement("div", {
+    style: CD
+  }, /*#__PURE__*/React.createElement("div", {
+    style: SH
+  }, "✅ Final Values (Engineer's Judgment)"), /*#__PURE__*/React.createElement("div", {
+    style: R2
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "SLS (kPa)"), /*#__PURE__*/React.createElement("input", {
+    style: {
+      ...I,
+      fontSize: 26,
+      fontWeight: "800",
+      color: "#14294D",
+      textAlign: "center"
+    },
+    value: recs.sls,
+    onChange: e => sr("sls", e.target.value),
+    placeholder: "—"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "ULS (kPa)"), /*#__PURE__*/React.createElement("input", {
+    style: {
+      ...I,
+      fontSize: 26,
+      fontWeight: "800",
+      color: "#c0392b",
+      textAlign: "center"
+    },
+    value: recs.uls,
+    onChange: e => sr("uls", e.target.value),
+    placeholder: "—"
+  }))), SuMin && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Undrained Su for Report (kPa)"), /*#__PURE__*/React.createElement("input", {
+    style: {
+      ...I,
+      fontSize: 18,
+      fontWeight: "700",
+      color: "#e07800",
+      textAlign: "center"
+    },
+    value: recs.Su,
+    onChange: e => sr("Su", e.target.value),
+    placeholder: String(SuMin)
+  })), recs.sls && recs.uls && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#555",
+      textAlign: "center",
+      padding: 8,
+      background: "#f0f4ff",
+      borderRadius: 6,
+      marginBottom: 12
+    }
+  }, "ULS/SLS = ", (parseFloat(recs.uls) / parseFloat(recs.sls)).toFixed(2), " ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#aaa"
+    }
+  }, "(target: 1.50)")), /*#__PURE__*/React.createElement("label", {
+    style: LB
+  }, "Additional Notes for Summary (optional)"), /*#__PURE__*/React.createElement("textarea", {
+    style: {
+      ...I,
+      minHeight: 52,
+      resize: "vertical",
+      fontSize: 13
+    },
+    value: recs.notes,
+    onChange: e => sr("notes", e.target.value),
+    placeholder: "e.g. Remove soft soil at footing areas prior to construction..."
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setTab(3),
+    style: BB("#14294D")
+  }, "Next: Generate Report →")), tab === 3 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: CD
+  }, /*#__PURE__*/React.createElement("div", {
+    style: SH
+  }, "📋 Report Summary"), [["📍 Site", proj.address || "⚠ Not entered"], ["📅 Inspection", fDate(proj.inspDate)], ["🏗 Structure", proj.structureType], ["🔩 Boreholes", bhs.map(b => b.id).join(", ") + " (" + bhs.length + " total)"], ["🧪 Tests", [...new Set(bhs.flatMap(b => b.tests.map(t => TL[t.type])))].join(", ") || "None"], recs.sls && ["✅ SLS / ULS", recs.sls + " kPa  /  " + recs.uls + " kPa"], recs.Su && ["🔬 Su", recs.Su + " kPa"]].filter(Boolean).map(([k, v]) => /*#__PURE__*/React.createElement("div", {
+    key: k,
+    style: {
+      display: "flex",
+      gap: 8,
+      fontSize: 13,
+      padding: "4px 0",
+      borderBottom: "1px solid var(--border-color)"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      minWidth: 130,
+      fontWeight: "600"
+    }
+  }, k), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: v.startsWith("⚠") ? "#e74c3c" : "inherit"
+    }
+  }, v)))), (!recs.sls || !recs.uls) && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff3cd",
+      border: "1px solid #ffc107",
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 14,
+      fontSize: 13,
+      color: "#856404"
+    }
+  }, "⚠ SLS/ULS not set — go to Calculations tab before generating."), !proj.address && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#f8d7da",
+      border: "1px solid #f5c6cb",
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 14,
+      fontSize: 13,
+      color: "#721c24"
+    }
+  }, "⚠ Site address missing — go to Project Info tab."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#eef4fb",
+      border: "1px solid #cfe0f5",
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 14,
+      fontSize: 12,
+      color: "#33526e"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      marginBottom: 6
+    }
+  }, "📷 Figure 1 — site / borehole location image (optional)"), /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/*",
+    onChange: e => onFig(e.target.files && e.target.files[0]),
+    style: {
+      fontSize: 13
+    }
+  }), figImg ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement("img", {
+    src: "data:" + figImg.mime + ";base64," + figImg.b64,
+    style: {
+      maxWidth: "100%",
+      maxHeight: 220,
+      borderRadius: 6,
+      border: "1px solid #cfe0f5"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 4
+    }
+  }, "✓ Embedded as Figure 1. ", /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setFigImg(null),
+    style: {
+      border: "none",
+      background: "none",
+      color: "#c0392b",
+      cursor: "pointer",
+      fontWeight: 700,
+      padding: 0
+    }
+  }, "Remove"))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      color: "#5b6675"
+    }
+  }, "If added, it is placed under \"Borehole location\" as Figure 1 in both Word and PDF. If left blank, a placeholder is inserted to paste into later.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff",
+      border: "1px solid var(--border-color)",
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      marginBottom: 8,
+      color: "#14294D"
+    }
+  }, "🗂 Appendix A — site photos (up to 4, each with a description)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12
+    }
+  }, photos.map((p, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      border: "1px dashed #cfd8e6",
+      borderRadius: 8,
+      padding: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#6b7280",
+      marginBottom: 4
+    }
+  }, "Photo ", i + 1), /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/*",
+    onChange: e => onPhoto(i, e.target.files && e.target.files[0]),
+    style: {
+      fontSize: 12,
+      width: "100%"
+    }
+  }), p.img && /*#__PURE__*/React.createElement("img", {
+    src: "data:" + p.img.mime + ";base64," + p.img.b64,
+    style: {
+      display: "block",
+      maxWidth: "100%",
+      maxHeight: 120,
+      marginTop: 6,
+      borderRadius: 4,
+      border: "1px solid #cfd8e6"
+    }
+  }), /*#__PURE__*/React.createElement("input", {
+    value: p.desc,
+    onChange: e => setPhotoDesc(i, e.target.value),
+    placeholder: "Short description",
+    style: {
+      marginTop: 6,
+      width: "100%",
+      padding: "7px 9px",
+      border: "1px solid var(--border-color)",
+      borderRadius: 6,
+      fontSize: 12,
+      boxSizing: "border-box"
+    }
+  }), p.img && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => onPhoto(i, null),
+    style: {
+      marginTop: 4,
+      border: "none",
+      background: "none",
+      color: "#c0392b",
+      cursor: "pointer",
+      fontSize: 11,
+      fontWeight: 700,
+      padding: 0
+    }
+  }, "Remove")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#5b6675",
+      marginTop: 8
+    }
+  }, "Added photos appear as a 2×2 \"Figure 2 — Site Photos\" appendix on its own page, each with its description.")), /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", margin: "16px 0 4px" }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => { if (window.confirm("Clear all fields and start over?")) location.reload(); },
+    style: GB("#64748b")
+  }, "↺ Reset"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setPreview(p => !p),
+    style: GB("#138d75")
+  }, preview ? "✕  Hide preview" : "👁  Preview report"), /*#__PURE__*/React.createElement("button", {
+    onClick: download,
+    disabled: gen || !ready,
+    style: {
+      ...GB("#2B579A"),
+      opacity: gen || !ready ? 0.6 : 1,
+      cursor: gen || !ready ? "not-allowed" : "pointer"
+    }
+  }, gen ? "⏳ Generating…" : !ready ? "⏳ Loading…" : "⬇  Download Word"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => downloadPdf(proj, bhs, recs, figImg, photos),
+    style: GB("#C0392B")
+  }, "⬇  Download PDF")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#888",
+      textAlign: "center",
+      marginTop: -4
+    }
+  }, "Word (.docx) or PDF · King EPCM letterhead · stamped DRAFT until the report is sealed and signed"), preview && /*#__PURE__*/React.createElement("iframe", {
+    title: "Report preview",
+    srcDoc: buildReportHtml(proj, bhs, recs, figImg, photos),
+    style: {
+      width: "100%",
+      height: "75vh",
+      border: "1px solid var(--border-color)",
+      borderRadius: 8,
+      background: "#fff",
+      marginTop: 14
+    }
+  }))));
+}
+;
+(function () {
+  function mount() {
+    ReactDOM.createRoot(document.getElementById("bc-root")).render(/*#__PURE__*/React.createElement(App, null));
+  }
+  function gate() {
+    var g = document.getElementById("bc-gate");
+    if (g) g.hidden = false;
+  }
+  fetch("/.auth/me").then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (d) {
+    var roles = d && d.clientPrincipal && d.clientPrincipal.userRoles || null;
+    if (roles === null) {
+      mount();
+      return;
+    }
+    if (roles.indexOf("engineer") > -1 || roles.indexOf("admin") > -1 || roles.indexOf("field") > -1) mount();else gate();
+  }).catch(function () {
+    mount();
+  });
+})();
+</script>
+<script src="app.js"></script>
+</main>
+</body>
+</html>
