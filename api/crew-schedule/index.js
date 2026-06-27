@@ -20,18 +20,30 @@
  * No Microsoft Graph / Azure permissions are needed. Degrades gracefully:
  * returns 501 when not configured; per-section failures log and return empty lists.
  */
+const zlib = require("zlib");
+let TableClient = null;
+try { TableClient = require("@azure/data-tables").TableClient; } catch (e) { /* durable cache optional */ }
+
 const BASE = (process.env.QBT_BASE || "https://rest.tsheets.com/api/v1").replace(/\/+$/, "");
 const TOKEN = process.env.QBT_ACCESS_TOKEN;
 const CAL_IDS = (process.env.QBT_SCHEDULE_CALENDAR_IDS || "").trim();
 
+// Per-request timeout so a slow/hung QuickBooks call fails fast instead of hanging the page.
+const FETCH_TIMEOUT = +(process.env.QBT_FETCH_TIMEOUT_MS || 12000);
+
 // In-memory caches shared across warm invocations. The all-history time-off fetch is the
-// slow part (the endpoint has no date filter), so we cache it briefly and just re-filter
-// the cached entries to the requested window on each call.
-const TOF_TTL = +(process.env.QBT_TIMEOFF_TTL_MS || 180000); // 3 min
+// slow part (the endpoint has no date filter), so we cache it and just re-filter the cached
+// entries to the requested window on each call.
+const TOF_TTL = +(process.env.QBT_TIMEOFF_TTL_MS || 600000); // 10 min
 const CAL_TTL = 600000; // 10 min — schedule calendars rarely change
 let _tof = null, _tofTs = 0;
 let _calIds = null, _calTs = 0;
 let _jc = null, _jcTs = 0; const JC_TTL = 600000; // cached jobcode id -> name (time-off types)
+
+// Durable cache for the time-off bundle (survives cold starts, unlike the in-memory cache above).
+// Stored gzip+base64 in Table Storage, chunked across properties. Entirely optional & best-effort.
+const CACHE_CONN = process.env.QBT_CACHE_CONNECTION || process.env.NEWS_STORAGE_CONNECTION || process.env.AzureWebJobsStorage || "";
+const CACHE_TABLE = "qbtcache";
 
 module.exports = async function (context, req) {
   if (!TOKEN) { context.res = json(501, { configured: false, error: "QuickBooks Time not configured" }); return; }
@@ -92,18 +104,23 @@ module.exports = async function (context, req) {
   try {
     var tof;
     if (_tof && (Date.now() - _tofTs) < TOF_TTL) {
-      tof = _tof; // reuse the cached all-history time-off data
+      tof = _tof; // reuse the in-memory cache (warm instance)
     } else {
-      const supEntries = {}, reqStatus = {}, users = {}, jobcodes = {};
-      function absorbTOR(supp) {
-        if (supp && supp.users) Object.keys(supp.users).forEach(function (id) { var u = supp.users[id]; users[id] = { name: nameOf(u), active: u.active !== false }; });
-        if (supp && supp.jobcodes) Object.keys(supp.jobcodes).forEach(function (id) { jobcodes[id] = supp.jobcodes[id].name || ""; });
-        if (supp && supp.time_off_request_entries) Object.keys(supp.time_off_request_entries).forEach(function (id) { supEntries[id] = supp.time_off_request_entries[id]; });
+      tof = await durableReadTof(); // survives cold starts — a single fast read instead of the slow all-history fetch
+      if (tof) { _tof = tof; _tofTs = Date.now(); }
+      else {
+        const supEntries = {}, reqStatus = {}, users = {}, jobcodes = {};
+        function absorbTOR(supp) {
+          if (supp && supp.users) Object.keys(supp.users).forEach(function (id) { var u = supp.users[id]; users[id] = { name: nameOf(u), active: u.active !== false }; });
+          if (supp && supp.jobcodes) Object.keys(supp.jobcodes).forEach(function (id) { jobcodes[id] = supp.jobcodes[id].name || ""; });
+          if (supp && supp.time_off_request_entries) Object.keys(supp.time_off_request_entries).forEach(function (id) { supEntries[id] = supp.time_off_request_entries[id]; });
+        }
+        const reqs = await qbAll("time_off_requests", {}, "time_off_requests", absorbTOR, context);
+        reqs.forEach(function (r) { reqStatus[String(r.id)] = String(r.status || ""); });
+        tof = { supEntries: supEntries, reqStatus: reqStatus, users: users, jobcodes: jobcodes };
+        _tof = tof; _tofTs = Date.now();
+        await durableWriteTof(tof); // populate the durable cache for the next cold start
       }
-      const reqs = await qbAll("time_off_requests", {}, "time_off_requests", absorbTOR, context);
-      reqs.forEach(function (r) { reqStatus[String(r.id)] = String(r.status || ""); });
-      tof = { supEntries: supEntries, reqStatus: reqStatus, users: users, jobcodes: jobcodes };
-      _tof = tof; _tofTs = Date.now();
     }
     // seed the shared maps from the (possibly cached) time-off data
     Object.keys(tof.users).forEach(function (id) { if (userMap[id] === undefined) userMap[id] = tof.users[id].name; if (userActive[id] === undefined) userActive[id] = tof.users[id].active; });
@@ -162,13 +179,25 @@ async function allJobcodes(context) {
   return _jc || map;
 }
 
+// A single fetch with a hard timeout (so the request can't hang indefinitely).
+async function qbFetch(url) {
+  const ac = new AbortController();
+  const t = setTimeout(function () { ac.abort(); }, FETCH_TIMEOUT);
+  try {
+    return await fetch(url, { headers: { Authorization: "Bearer " + TOKEN }, signal: ac.signal });
+  } catch (e) {
+    if (e && (e.name === "AbortError" || /abort/i.test(String(e.message || e)))) throw new Error("timed out after " + FETCH_TIMEOUT + "ms");
+    throw e;
+  } finally { clearTimeout(t); }
+}
+
 // Fetch every page of a QuickBooks Time list endpoint. Returns an array of objects.
 async function qbAll(endpoint, params, resultsKey, onSupp, context) {
   const out = []; let page = 1, guard = 0;
   while (guard++ < 25) {
     const qs = Object.keys(params).map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); }).join("&");
     const url = BASE + "/" + endpoint + "?" + qs + "&page=" + page;
-    const r = await fetch(url, { headers: { Authorization: "Bearer " + TOKEN } });
+    const r = await qbFetch(url);
     if (!r.ok) { const t = await safeText(r); throw new Error(endpoint + " " + r.status + " " + t.slice(0, 200)); }
     const j = await r.json();
     if (onSupp) onSupp(j.supplemental_data);
@@ -178,6 +207,35 @@ async function qbAll(endpoint, params, resultsKey, onSupp, context) {
     page++;
   }
   return out;
+}
+
+/* ---------- Durable cache (Table Storage, gzip + chunked) for the time-off bundle ---------- */
+function cacheClient() {
+  if (!TableClient || !CACHE_CONN) return null;
+  try { return TableClient.fromConnectionString(CACHE_CONN, CACHE_TABLE); } catch (e) { return null; }
+}
+async function durableReadTof() {
+  const c = cacheClient(); if (!c) return null;
+  try {
+    const e = await c.getEntity("timeoff", "v1");
+    if (!e || !e.ts || (Date.now() - Number(e.ts)) > TOF_TTL) return null;
+    let b64 = ""; const n = Number(e.chunks || 0);
+    for (let i = 0; i < n; i++) b64 += e["c" + i] || "";
+    if (!b64) return null;
+    return JSON.parse(zlib.gunzipSync(Buffer.from(b64, "base64")).toString("utf8"));
+  } catch (e) { return null; }
+}
+async function durableWriteTof(tof) {
+  const c = cacheClient(); if (!c) return;
+  try { await c.createTable(); } catch (e) { /* exists */ }
+  try {
+    const b64 = zlib.gzipSync(Buffer.from(JSON.stringify(tof), "utf8")).toString("base64");
+    const CH = 30000, ent = { partitionKey: "timeoff", rowKey: "v1", ts: Date.now() };
+    let n = 0;
+    for (let p = 0; p < b64.length; p += CH) { ent["c" + n] = b64.slice(p, p + CH); n++; if (n > 30) return; } // too big — skip (stay on in-memory)
+    ent.chunks = n;
+    await c.upsertEntity(ent, "Replace");
+  } catch (e) { /* best-effort */ }
 }
 
 function nameOf(u) {

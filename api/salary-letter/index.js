@@ -19,6 +19,7 @@ const SITE_PATH = process.env.REVIEW_SITE_PATH;
 const BASE_PATH = process.env.REVIEW_BASE_PATH;
 const LIBRARY = process.env.REVIEW_LIBRARY || "";
 const SUBFOLDER = process.env.EMPLOYMENT_LETTER_SUBFOLDER || ""; // blank = staff folder root
+const { buildSimpleLetterDocx } = require("../_shared/letterDocx");
 let _driveId;
 
 module.exports = async function (context, req) {
@@ -38,11 +39,13 @@ module.exports = async function (context, req) {
     context.res = json(400, { ok: false, error: "New position is required for a promotion" }); return;
   }
 
-  const docTitle = kind === "promotion" ? "Promotion Letter" : "Salary Adjustment Letter";
-  const pdf = await buildLetter(kind, docTitle, b, loadLogo());
+  const logo = loadLogo();
+  const model = letterModel(kind, b);
+  const pdf = await buildPdf(model, logo);
+  const docx = buildSimpleLetterDocx({ docTitle: model.docTitle, name: model.name, dateStr: ordinalDate(new Date()), salutation: model.salutation, paragraphs: model.paragraphs, closing: model.closing, signer: model.signer, logo: logo });
 
-  const base = sanitize(docTitle + " - " + name + " - " + shortToday());
-  const out = { ok: true, filename: base + ".pdf", pdfBase64: pdf.toString("base64"), filed: false, filedTo: null, notes: [] };
+  const base = sanitize(model.docTitle + " - " + name + " - " + shortToday());
+  const out = { ok: true, filename: base + ".pdf", pdfBase64: pdf.toString("base64"), docxFilename: base + ".docx", docxBase64: docx.toString("base64"), filed: false, filedTo: null, notes: [] };
 
   if (CLIENT_ID && CLIENT_SECRET && SITE_PATH && BASE_PATH) {
     try {
@@ -73,7 +76,55 @@ function loadLogo() {
   catch (e) { return null; }
 }
 
-function buildLetter(kind, docTitle, b, logo) {
+// Build the letter content once; both the PDF and the Word renderer consume this model.
+function letterModel(kind, b) {
+  const name = (b.name || "").trim(), fn = firstName(name);
+  const eff = b.effectiveDate ? ordinalDate(parseDate(b.effectiveDate)) : "";
+  const prevBasis = String(b.prevBasis || b.salaryBasis || "year").toLowerCase() === "hour" ? "hour" : "year";
+  const newBasis = String(b.newBasis || b.salaryBasis || "year").toLowerCase() === "hour" ? "hour" : "year";
+  const sameBasis = prevBasis === newBasis;
+  const prev = parseNum(b.prevAmount), next = parseNum(b.newAmount), hasPay = prev && next;
+  const reason = (b.reason || "").trim();
+  const pct = sameBasis ? pctText(prev, next) : ""; // a % only makes sense within the same basis
+  function moneyPer(amt, basis) { return money(amt) + (basis === "hour" ? " per hour" : " per year"); }
+  function basisWord(basis) { return basis === "hour" ? "hourly rate of pay" : "annual salary"; }
+  const docTitle = kind === "promotion" ? "Promotion Letter" : "Salary Adjustment Letter";
+  const paras = [];
+
+  if (kind === "promotion") {
+    const prevPos = (b.prevPosition || "").trim(), newPos = (b.newPosition || "").trim();
+    paras.push({ text: "On behalf of King EPCM, I am pleased to confirm your promotion to the position of " + newPos + (prevPos ? ", from your previous role as " + prevPos : "") + (eff ? ", effective " + eff : "") + "." });
+    if (hasPay) {
+      if (sameBasis) paras.push({ text: "In connection with this promotion, your " + basisWord(newBasis) + " will increase from " + moneyPer(prev, prevBasis) + " to " + moneyPer(next, newBasis) + (pct ? ", an increase of " + pct + "%" : "") + (eff ? ", effective " + eff : "") + ". All amounts are before taxes and applicable deductions." });
+      else paras.push({ text: "In connection with this promotion, your compensation will change from " + moneyPer(prev, prevBasis) + " to " + moneyPer(next, newBasis) + (eff ? ", effective " + eff : "") + ". All amounts are before taxes and applicable deductions." });
+    }
+    if (reason) paras.push({ text: reason });
+    paras.push({ text: "Enclosed with this letter you will find an updated employment agreement and a description of the job responsibilities for your new role. To accept the position, please review and sign the employment agreement and return the signed copy to HR." });
+    paras.push({ text: "This promotion reflects our appreciation of your contributions and the value you bring to the team. Congratulations, and thank you for your continued commitment to King EPCM." });
+  } else {
+    const introWord = sameBasis ? basisWord(newBasis) : "compensation";
+    paras.push({ text: "On behalf of King EPCM, I am pleased to inform you that your " + introWord + " will be adjusted" + (eff ? ", effective " + eff : "") + " as follows:", after: 6 });
+    paras.push({ text: "Previous: " + moneyPer(prev, prevBasis), indent: true, after: 2 });
+    paras.push({ text: "New: " + moneyPer(next, newBasis), indent: true, after: 2 });
+    if (pct) paras.push({ text: "Increase: " + pct + "%", indent: true, bold: true });
+    paras.push({ text: "All amounts are stated before taxes and applicable deductions." + (reason ? " " + reason : "") });
+    paras.push({ text: "Thank you for your continued contributions and commitment to King EPCM. We look forward to your ongoing success with the team." });
+  }
+  paras.push({ text: "Should you have any questions, please feel free to contact the undersigned." });
+
+  return {
+    docTitle: docTitle, name: name, salutation: "Dear " + fn + ",", closing: "Sincerely,", paragraphs: paras,
+    signer: {
+      name: (b.signedByName || "").trim() || "Angela Shi",
+      title: (b.signedByTitle || "").trim() || "Operation Manager",
+      phone: (b.signedByPhone || "").trim() || "416-342-3001 x109",
+      email: (b.signedByEmail || "").trim() || "AShi@KingEPCM.com"
+    }
+  };
+}
+
+// Render the model to a branded PDF (King EPCM letterhead, gold rule, navy footer).
+function buildPdf(model, logo) {
   return new Promise(function (resolve, reject) {
     try {
       const PDFDocument = require("pdfkit");
@@ -84,77 +135,39 @@ function buildLetter(kind, docTitle, b, logo) {
 
       const NAVY = "#14294D", GOLD = "#E5A823", INK = "#222", GREY = "#666";
       const W = doc.page.width, H = doc.page.height, L = 64, R = W - 64, CW = R - L;
-      const name = (b.name || "").trim(), fn = firstName(name);
-      const eff = b.effectiveDate ? ordinalDate(parseDate(b.effectiveDate)) : "";
-      const basis = String(b.salaryBasis || "year").toLowerCase() === "hour" ? "hour" : "year";
-      const prev = parseNum(b.prevAmount), next = parseNum(b.newAmount);
-      const hasPay = prev && next;
-      const reason = (b.reason || "").trim();
+      const title = model.docTitle, name = model.name;
 
-      // ---- Letterhead ----
       let drew = false;
       if (logo) { try { doc.image(logo, L, 44, { width: 165 }); drew = true; } catch (e) {} }
       if (!drew) {
-        doc.fillColor(GOLD).font("Helvetica-Bold").fontSize(26).text("KING EPCM", L, 44);
-        doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(8).text("Flexible. Dependable. On-site Engineering.", L, 80);
+        doc.fillColor(GOLD).font("Times-Bold").fontSize(26).text("KING EPCM", L, 44);
+        doc.fillColor(NAVY).font("Times-Bold").fontSize(8).text("Flexible. Dependable. On-site Engineering.", L, 80);
       }
-      doc.fillColor(NAVY).font("Times-Roman").fontSize(10).text(docTitle, L, 61, { width: CW, align: "right" });
+      doc.fillColor(NAVY).font("Times-Roman").fontSize(10).text(title, L, 61, { width: CW, align: "right" });
       if (name) doc.fillColor(GREY).text(name, L, 75, { width: CW, align: "right" });
       doc.moveTo(L, 120).lineTo(R, 120).lineWidth(2.5).strokeColor(GOLD).stroke();
       doc.moveTo(L, 124.5).lineTo(R, 124.5).lineWidth(0.8).strokeColor(NAVY).stroke();
 
-      // ---- Date ----
       doc.fillColor(INK).font("Times-Roman").fontSize(12).text(ordinalDate(new Date()), L, 144);
       doc.moveDown(1);
-
-      // ---- RE + salutation (addressed to the employee) ----
-      doc.font("Times-Bold").fontSize(12).fillColor(INK).text("RE:    " + docTitle, L);
+      doc.font("Times-Bold").fontSize(12).fillColor(INK).text("RE:    " + title, L);
       if (name) doc.text("          " + name, L);
       doc.moveDown(0.8);
-      doc.font("Times-Roman").fontSize(12).fillColor(INK).text("Dear " + fn + ",", { paragraphGap: 12 });
+      doc.font("Times-Roman").fontSize(12).fillColor(INK).text(model.salutation, { paragraphGap: 12 });
 
-      const basisWord = basis === "hour" ? "hourly rate of pay" : "annual salary";
-      const per = basis === "hour" ? " per hour" : "";
-      const pct = pctText(prev, next);
+      model.paragraphs.forEach(function (p) {
+        doc.font(p.bold ? "Times-Bold" : "Times-Roman").fontSize(12).fillColor(INK)
+          .text(p.text, L + (p.indent ? 24 : 0), doc.y, { width: CW - (p.indent ? 24 : 0), paragraphGap: p.after === 2 ? 4 : (p.after === 6 ? 8 : 12), lineGap: 3 });
+      });
 
-      if (kind === "promotion") {
-        const prevPos = (b.prevPosition || "").trim(), newPos = (b.newPosition || "").trim();
-        let p1 = "On behalf of King EPCM, I am pleased to confirm your promotion to the position of " + newPos +
-          (prevPos ? ", from your previous role as " + prevPos : "") + (eff ? ", effective " + eff : "") + ".";
-        doc.text(p1, { paragraphGap: 12, lineGap: 3 });
-        if (hasPay) {
-          doc.text("In connection with this promotion, your " + basisWord + " will increase from " + money(prev) + per + " to " + money(next) + per +
-            (pct ? ", an increase of " + pct + "%" : "") + (eff ? ", effective " + eff : "") + ". All amounts are before taxes and applicable deductions.", { paragraphGap: 12, lineGap: 3 });
-        }
-        if (reason) doc.text(reason, { paragraphGap: 12, lineGap: 3 });
-        doc.text("This promotion reflects our appreciation of your contributions and the value you bring to the team. Congratulations, and thank you for your continued commitment to King EPCM.", { paragraphGap: 12, lineGap: 3 });
-      } else {
-        doc.text("On behalf of King EPCM, I am pleased to inform you that your " + basisWord + " will be adjusted" + (eff ? ", effective " + eff : "") + " as follows:", { paragraphGap: 10, lineGap: 3 });
-        // Simple figures block
-        doc.font("Times-Roman").fontSize(12);
-        doc.text("Previous " + basisWord + ":     " + money(prev) + per, L + 24, doc.y, { lineGap: 2 });
-        doc.text("New " + basisWord + ":            " + money(next) + per, L + 24, doc.y, { lineGap: 2 });
-        if (pct) doc.font("Times-Bold").text("Increase:                       " + pct + "%", L + 24, doc.y, { lineGap: 2 });
-        doc.font("Times-Roman").moveDown(0.6);
-        doc.text("All amounts are stated before taxes and applicable deductions." + (reason ? " " + reason : ""), L, doc.y, { paragraphGap: 12, lineGap: 3 });
-        doc.text("Thank you for your continued contributions and commitment to King EPCM. We look forward to your ongoing success with the team.", { paragraphGap: 12, lineGap: 3 });
-      }
-
-      doc.text("Should you have any questions, please feel free to contact the undersigned.", { paragraphGap: 26, lineGap: 3 });
-
-      // ---- Signed block ----
-      doc.text("Sincerely,");
+      doc.font("Times-Roman").fontSize(12).fillColor(INK).text(model.closing || "Sincerely,", L, doc.y);
       doc.moveDown(3.2);
-      const sName = (b.signedByName || "").trim() || "Angela Shi";
-      const sTitle = (b.signedByTitle || "").trim() || "Operation Manager";
-      const sPhone = (b.signedByPhone || "").trim() || "416-342-3001 x109";
-      const sEmail = (b.signedByEmail || "").trim() || "AShi@KingEPCM.com";
-      doc.font("Times-Roman").fontSize(12).fillColor(INK).text(sName, L);
-      doc.font("Times-Italic").fontSize(12).text(sTitle, L);
-      doc.font("Times-Roman").fontSize(12).text("T: " + sPhone, L);
-      doc.text("E: " + sEmail, L);
+      const sg = model.signer || {};
+      doc.font("Times-Roman").fontSize(12).fillColor(INK).text(sg.name, L);
+      if (sg.title) doc.font("Times-Italic").fontSize(12).text(sg.title, L);
+      doc.font("Times-Roman").fontSize(12).text("T: " + sg.phone, L);
+      doc.text("E: " + sg.email, L);
 
-      // ---- Navy footer band ----
       doc.page.margins.bottom = 0;
       var bandH = 46;
       doc.rect(0, H - bandH, W, bandH).fill(NAVY);

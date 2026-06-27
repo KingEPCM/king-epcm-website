@@ -59,8 +59,9 @@ module.exports = async function (context, req) {
   if (!myName) myName = p.name || p.email;
   const subjectName = (isSubjectForm && body.subjectName) ? String(body.subjectName).trim() : myName;
 
-  const ver = body.version ? " (" + String(body.version) + ")" : "";
-  const fileBase = sanitize((body.title || "Review") + ver + " - " + subjectName + " - " + (body.quarter || body.date || today()));
+  // Shortened export name, no version: e.g. "Form B - Jessica Fung - Q2 2026".
+  const shortTitle = body.form ? ("Form " + String(body.form).trim().toUpperCase()) : (body.title || "Review");
+  const fileBase = sanitize(shortTitle + " - " + subjectName + " - " + (body.quarter || body.date || today()));
 
   // 1) Store a copy in Table Storage.
   if (CONN) {
@@ -126,29 +127,196 @@ module.exports = async function (context, req) {
   context.res = json(status.ok ? 200 : 502, status);
 };
 
-/* ---------- PDF ---------- */
+/* ---------- PDF — branded, mimics the Word KRA template ---------- */
+function loadLogo() {
+  try { return require("fs").readFileSync(require("path").join(__dirname, "logo.png")); } catch (e) { return null; }
+}
 function buildPdf(body, name) {
   return new Promise(function (resolve, reject) {
     try {
-      const doc = new PDFDocument({ size: "A4", margin: 50 });
+      const logo = loadLogo();
+      const doc = new PDFDocument({ size: "A4", margin: 50, bufferPages: true });
       const chunks = [];
       doc.on("data", function (d) { chunks.push(d); });
       doc.on("end", function () { resolve(Buffer.concat(chunks)); });
-      doc.fillColor("#14294D").font("Helvetica-Bold").fontSize(18).text("King EPCM");
-      doc.fillColor("#C8901A").fontSize(13).text(body.title || "Performance review");
-      doc.moveDown(0.3).fillColor("#555").font("Helvetica").fontSize(10)
-        .text("Name: " + name + "     " + (body.quarter ? "Quarter: " + body.quarter + "     " : "") + "Date: " + (body.date || today()) + (body.version ? "     Form version: " + body.version : ""));
-      doc.moveDown(0.6);
-      (body.sections || []).forEach(function (sec) {
-        doc.moveDown(0.3).fillColor("#14294D").font("Helvetica-Bold").fontSize(12).text(sec.heading || "");
-        var y = doc.y + 2; doc.moveTo(50, y).lineTo(545, y).strokeColor("#E5A823").lineWidth(1).stroke();
-        doc.moveDown(0.4);
-        (sec.rows || []).forEach(function (r) {
-          doc.fillColor("#14294D").font("Helvetica-Bold").fontSize(10).text((r.label || "") + ":");
-          doc.fillColor("#222").font("Helvetica").fontSize(10).text(String(r.value || "—"), { indent: 14 });
-          doc.moveDown(0.25);
+
+      const NAVY = "#14294D", GOLD = "#E5A823", GOLD_DARK = "#C8901A",
+        INK = "#1F2A37", MUTED = "#5B6675", FAINT = "#9AA4B2",
+        LINE = "#D8DEE7", SHADE = "#F1F4F8", HILITE = "#FBF2DA";
+      const L = 50, R = 545, W = R - L, BOTTOM = 800;
+      const titleText = body.title || "Performance review";
+      const intro = (body.intro || "").trim();
+      const logoH = logo ? 150 * 352 / 982 : 0;
+
+      function ensure(h) { if (doc.y + h > BOTTOM) { doc.addPage(); slimHeader(); } }
+
+      // Full brand band (page 1)
+      function topBand() {
+        var topY = 42, logoBottom = topY;
+        if (logo) { try { doc.image(logo, L, topY, { width: 150 }); logoBottom = topY + logoH; } catch (e) {} }
+        doc.font("Helvetica-Oblique").fontSize(8.5).fillColor(MUTED)
+          .text("Flexible. Dependable. On-site Engineering.", L, topY + 2, { width: W, align: "right" });
+        doc.font("Helvetica").fontSize(8).fillColor(MUTED)
+          .text("HR & Payroll · Development Review & KRA", L, doc.y + 1, { width: W, align: "right" });
+        if (body.version) doc.font("Helvetica").fontSize(7.5).fillColor(FAINT)
+          .text("Form version " + body.version, L, doc.y + 1, { width: W, align: "right" });
+        var y = Math.max(logoBottom, doc.y) + 9;
+        doc.moveTo(L, y).lineTo(R, y).lineWidth(1.4).strokeColor(NAVY).stroke();
+        return y + 12;
+      }
+      // Slim running header (pages 2+)
+      function slimHeader() {
+        var y = 40;
+        if (logo) { try { doc.image(logo, L, y, { width: 92 }); } catch (e) {} }
+        doc.font("Helvetica-Bold").fontSize(9).fillColor(NAVY).text(titleText, L, y + 8, { width: W, align: "right" });
+        var yy = y + 34;
+        doc.moveTo(L, yy).lineTo(R, yy).lineWidth(1).strokeColor(LINE).stroke();
+        doc.y = yy + 12;
+      }
+      function titleBlock(startY) {
+        doc.font("Helvetica-Bold").fontSize(15).fillColor(NAVY).text(titleText, L, startY, { width: W });
+        var y = doc.y + 3;
+        doc.moveTo(L, y).lineTo(R, y).lineWidth(2).strokeColor(GOLD).stroke();
+        var yy = y + 8;
+        if (intro) { doc.font("Helvetica-Oblique").fontSize(9.5).fillColor(MUTED).text(intro, L, yy, { width: W }); yy = doc.y + 4; }
+        doc.y = yy + 6;
+      }
+      function infoTable() {
+        var rows = [["Name", name], ["Quarter", body.quarter || "—"], ["Date", body.date || today()]];
+        var labelW = 120, rowH = 22;
+        rows.forEach(function (r) {
+          ensure(rowH); var y = doc.y;
+          doc.rect(L, y, labelW, rowH).fillAndStroke(SHADE, LINE);
+          doc.rect(L + labelW, y, W - labelW, rowH).lineWidth(1).strokeColor(LINE).stroke();
+          doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(9.5).text(r[0], L + 8, y + 6, { width: labelW - 12 });
+          doc.fillColor(INK).font("Helvetica").fontSize(9.5).text(String(r[1]), L + labelW + 8, y + 6, { width: W - labelW - 14 });
+          doc.y = y + rowH;
         });
+        doc.y += 12;
+      }
+      function scaleBox(scale) {
+        if (!scale || !scale.length) return;
+        ensure(30);
+        doc.font("Helvetica-Bold").fontSize(10.5).fillColor(NAVY).text("Rating scale — how to read the scores", L, doc.y, { width: W });
+        var y = doc.y + 2; doc.moveTo(L, y).lineTo(R, y).lineWidth(1).strokeColor(GOLD).stroke(); doc.y = y + 6;
+        var numW = 26;
+        scale.forEach(function (s) {
+          doc.font("Helvetica").fontSize(9);
+          var dh = doc.heightOfString(s.desc, { width: W - numW - 16 });
+          var rowH = Math.max(20, dh + 8);
+          ensure(rowH); var yy = doc.y;
+          doc.rect(L, yy, numW, rowH).fillAndStroke(NAVY, NAVY);
+          doc.rect(L + numW, yy, W - numW, rowH).lineWidth(0.8).strokeColor(LINE).stroke();
+          doc.fillColor("#FFFFFF").font("Helvetica-Bold").fontSize(10).text(String(s.n), L, yy + (rowH - 11) / 2, { width: numW, align: "center" });
+          doc.fillColor(INK).font("Helvetica").fontSize(9).text(s.desc, L + numW + 8, yy + (rowH - dh) / 2, { width: W - numW - 16 });
+          doc.y = yy + rowH;
+        });
+        doc.y += 12;
+      }
+      function sectionTitle(t) {
+        ensure(34); doc.moveDown(0.2);
+        doc.font("Helvetica-Bold").fontSize(11.5).fillColor(NAVY).text(t, L, doc.y, { width: W });
+        var y = doc.y + 2; doc.moveTo(L, y).lineTo(R, y).lineWidth(1).strokeColor(GOLD).stroke();
+        doc.y = y + 8;
+      }
+      function scoreRow(label, value, max) {
+        max = max || 5;
+        var labelW = W * 0.56;
+        doc.font("Helvetica-Bold").fontSize(9);
+        var lblH = doc.heightOfString(label, { width: labelW - 14 });
+        var rowH = Math.max(30, lblH + 12);
+        ensure(rowH); var y = doc.y, scaleX = L + labelW, cellW = (W - labelW) / max;
+        doc.lineWidth(0.8).strokeColor(LINE);
+        doc.rect(L, y, labelW, rowH).stroke();
+        for (var i = 0; i < max; i++) doc.rect(scaleX + i * cellW, y, cellW, rowH).stroke();
+        doc.fillColor(INK).font("Helvetica-Bold").fontSize(9).text(label, L + 8, y + (rowH - lblH) / 2, { width: labelW - 14 });
+        var sel = parseInt(value, 10);
+        for (var n = 1; n <= max; n++) {
+          var cx = scaleX + (n - 1) * cellW + cellW / 2, cy = y + rowH / 2, isSel = (n === sel);
+          doc.font(isSel ? "Helvetica-Bold" : "Helvetica").fontSize(10).fillColor(isSel ? NAVY : MUTED)
+            .text(String(n), scaleX + (n - 1) * cellW, cy - 6, { width: cellW, align: "center" });
+          if (isSel) doc.lineWidth(1.4).strokeColor(GOLD_DARK).circle(cx, cy, 9).stroke();
+        }
+        doc.y = y + rowH;
+      }
+      function optionRow(label, value, options) {
+        options = options || [];
+        var labelW = W * 0.40, optX = L + labelW, optW = W - labelW, txtX = optX + 22, txtW = optW - 32;
+        doc.font("Helvetica").fontSize(9);
+        var heights = options.map(function (o) { return Math.max(15, doc.heightOfString(o, { width: txtW }) + 5); });
+        var bodyH = heights.reduce(function (a, b) { return a + b; }, 0) + 10;
+        doc.font("Helvetica-Bold").fontSize(9);
+        var lblH = doc.heightOfString(label, { width: labelW - 14 });
+        var rowH = Math.max(bodyH, lblH + 12, 26);
+        ensure(rowH); var y = doc.y;
+        doc.lineWidth(0.8).strokeColor(LINE);
+        doc.rect(L, y, labelW, rowH).stroke();
+        doc.rect(optX, y, optW, rowH).stroke();
+        doc.fillColor(INK).font("Helvetica-Bold").fontSize(9).text(label, L + 8, y + 6, { width: labelW - 14 });
+        var oy = y + 6;
+        options.forEach(function (o, i) {
+          var isSel = (o === value);
+          if (isSel) doc.rect(optX + 4, oy - 1, optW - 8, heights[i]).fillColor(HILITE).fill();
+          // marker drawn as a vector dot (Unicode bullets aren't in the standard PDF font)
+          var mx = optX + 11, my = oy + 8;
+          if (isSel) doc.circle(mx, my, 3.2).fillColor(NAVY).fill();
+          else doc.circle(mx, my, 3).lineWidth(0.8).strokeColor(MUTED).stroke();
+          doc.font(isSel ? "Helvetica-Bold" : "Helvetica").fontSize(9).fillColor(isSel ? NAVY : MUTED)
+            .text(o, txtX, oy + 2, { width: txtW });
+          oy += heights[i];
+        });
+        doc.y = y + rowH;
+      }
+      function avgRow(value, count) {
+        ensure(24); var y = doc.y, h = 22;
+        doc.rect(L, y, W, h).fillAndStroke(SHADE, GOLD);
+        doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(9.5).text("Section average", L + 8, y + 6, { width: W / 2 });
+        doc.fillColor(GOLD_DARK).font("Helvetica-Bold").fontSize(11)
+          .text(String(value) + (count ? "   (avg of " + count + ")" : ""), L, y + 5, { width: W - 10, align: "right" });
+        doc.y = y + h + 10;
+      }
+      function textRow(label, value) {
+        value = (value == null || value === "") ? "—" : String(value);
+        var labelW = W * 0.30, ansX = L + labelW, ansW = W - labelW;
+        doc.font("Helvetica").fontSize(9.5);
+        var ansH = doc.heightOfString(value, { width: ansW - 16 });
+        doc.font("Helvetica-Bold").fontSize(9.5);
+        var lblH = doc.heightOfString(label, { width: labelW - 14 });
+        var rowH = Math.max(ansH, lblH) + 14;
+        ensure(Math.min(rowH, BOTTOM - 110)); var y = doc.y;
+        doc.rect(L, y, labelW, rowH).fillAndStroke(SHADE, LINE);
+        doc.rect(ansX, y, ansW, rowH).lineWidth(0.8).strokeColor(LINE).stroke();
+        doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(9.5).text(label, L + 8, y + 7, { width: labelW - 14 });
+        doc.fillColor(INK).font("Helvetica").fontSize(9.5).text(value, ansX + 8, y + 7, { width: ansW - 16 });
+        doc.y = y + rowH;
+      }
+
+      var hasScore = (body.sections || []).some(function (sec) { return (sec.rows || []).some(function (r) { return r.type === "score"; }); });
+      titleBlock(topBand());
+      infoTable();
+      if (hasScore) scaleBox(body.scale);
+      (body.sections || []).forEach(function (sec) {
+        sectionTitle(sec.heading || "");
+        (sec.rows || []).forEach(function (r) {
+          if (r.type === "score") scoreRow(r.label, r.value, r.max || 5);
+          else if (r.type === "option") optionRow(r.label, r.value, r.options || []);
+          else if (r.type === "avg") avgRow(r.value, r.count);
+          else textRow(r.label, r.value);
+        });
+        doc.y += 6;
       });
+
+      // Footer on every page. Drop the bottom margin first so writing into the
+      // footer band doesn't make PDFKit auto-insert blank pages.
+      var range = doc.bufferedPageRange();
+      for (var i = 0; i < range.count; i++) {
+        doc.switchToPage(range.start + i);
+        doc.page.margins.bottom = 0;
+        var fy = doc.page.height - 30;
+        doc.font("Helvetica").fontSize(7.5).fillColor(FAINT)
+          .text("King EPCM · Confidential — Development Review & KRA", L, fy, { width: W, align: "left", lineBreak: false });
+        doc.text("Page " + (i + 1) + " of " + range.count, L, fy, { width: W, align: "right", lineBreak: false });
+      }
       doc.end();
     } catch (e) { reject(e); }
   });

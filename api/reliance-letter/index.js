@@ -134,23 +134,24 @@ function buildLetterPdf(model, site, dateStr, logo) {
 
       function drawFooter() {
         doc.page.margins.bottom = 0;
-        const y = H - 50;
-        doc.moveTo(L, y).lineTo(R, y).lineWidth(0.8).strokeColor(GOLD).stroke();
-        doc.fillColor(MUTE).font("Helvetica").fontSize(8)
-          .text("King EPCM   ·   3780 14th Avenue, Unit 211, Markham, ON  L3R 9Y5   ·   416-342-3001   ·   KingEPCM.com", L, y + 6, { width: CW, align: "center", lineBreak: false });
+        const y = H - 52;
+        doc.moveTo(L, y).lineTo(R, y).lineWidth(2.2).strokeColor(GOLD).stroke();
+        doc.moveTo(L, y + 3.2).lineTo(R, y + 3.2).lineWidth(0.8).strokeColor(NAVY).stroke();
+        doc.fillColor(MUTE).font("Times-Roman").fontSize(8)
+          .text("King EPCM   ·   3780 14th Avenue, Unit 211, Markham, ON  L3R 9Y5   ·   416-342-3001   ·   KingEPCM.com", L, y + 13, { width: CW, align: "center", lineBreak: false });
       }
       let headerRuleY = null;
       function drawLetterhead() {
         let drew = false;
         if (logo) { try { doc.image(logo, L, 44, { width: 128 }); drew = true; } catch (e) {} }
         if (!drew) {
-          doc.fillColor(GOLD).font("Helvetica-Bold").fontSize(22).text("KING EPCM", L, 46);
-          doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(8).text("Flexible. Dependable. On-site Engineering.", L, 74);
+          doc.fillColor(GOLD).font("Times-Bold").fontSize(22).text("KING EPCM", L, 46);
+          doc.fillColor(NAVY).font("Times-Bold").fontSize(8).text("Flexible. Dependable. On-site Engineering.", L, 74);
         }
         const rx = L + CW * 0.40, rw = CW * 0.60;
-        doc.fillColor(MUTE).font("Helvetica").fontSize(10).text(dateStr, rx, 48, { width: rw, align: "right" });
-        doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(11).text(DOCTYPE, rx, 64, { width: rw, align: "right" });
-        doc.fillColor(MUTE).font("Helvetica").fontSize(9).text(site, rx, 80, { width: rw, align: "right" });
+        doc.fillColor(MUTE).font("Times-Roman").fontSize(10).text(dateStr, rx, 48, { width: rw, align: "right" });
+        doc.fillColor(NAVY).font("Times-Bold").fontSize(11).text(DOCTYPE, rx, 64, { width: rw, align: "right" });
+        doc.fillColor(MUTE).font("Times-Roman").fontSize(9).text(site, rx, 80, { width: rw, align: "right" });
         if (headerRuleY == null) headerRuleY = Math.max(96, doc.y + 4);
         doc.moveTo(L, headerRuleY).lineTo(R, headerRuleY).lineWidth(2.5).strokeColor(GOLD).stroke();
         doc.moveTo(L, headerRuleY + 4.5).lineTo(R, headerRuleY + 4.5).lineWidth(0.8).strokeColor(NAVY).stroke();
@@ -163,27 +164,27 @@ function buildLetterPdf(model, site, dateStr, logo) {
 
       function para(text, opts) {
         opts = opts || {};
-        doc.fillColor(INK).font("Helvetica").fontSize(10.5).text(text, L, doc.y, { width: CW, align: opts.align || "left", lineGap: 2, paragraphGap: opts.gap == null ? 11 : opts.gap });
+        doc.fillColor(INK).font("Times-Roman").fontSize(10.5).text(text, L, doc.y, { width: CW, align: opts.align || "left", lineGap: 2, paragraphGap: opts.gap == null ? 11 : opts.gap });
       }
-      function heading(text) { doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(13).text(text, L, doc.y, { width: CW }); doc.moveDown(0.4); }
+      function heading(text) { doc.fillColor(NAVY).font("Times-Bold").fontSize(13).text(text, L, doc.y, { width: CW }); doc.moveDown(0.4); }
       function ensure(h) { if (doc.y + h > H - doc.page.margins.bottom) doc.addPage(); }
       function renderReportLines(lines) {
-        doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(10.5).text("Report(s) relied upon:", L, doc.y, { width: CW });
+        doc.fillColor(NAVY).font("Times-Bold").fontSize(10.5).text("Report(s) relied upon:", L, doc.y, { width: CW });
         doc.moveDown(0.3);
         lines.forEach(function (line) {
           ensure(34);
-          doc.fillColor(INK).font("Helvetica").fontSize(10.5).text("•  " + line, L + 6, doc.y, { width: CW - 6, lineGap: 2, paragraphGap: 6 });
+          doc.fillColor(INK).font("Times-Roman").fontSize(10.5).text("•  " + line, L + 6, doc.y, { width: CW - 6, lineGap: 2, paragraphGap: 6 });
         });
         doc.moveDown(0.6);
       }
 
       // ---- body from the shared model ----
-      if (model.heading.big) { doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(15).text(model.heading.text, L, doc.y, { width: CW }); doc.moveDown(0.6); }
+      if (model.heading.big) { doc.fillColor(NAVY).font("Times-Bold").fontSize(15).text(model.heading.text, L, doc.y, { width: CW }); doc.moveDown(0.6); }
       else { heading(model.heading.text); }
 
       if (model.showTo && model.toLines.length) {
-        doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(10.5).text("To:", L, doc.y); doc.moveDown(0.2);
-        doc.fillColor(INK).font("Helvetica").fontSize(10.5).text(model.toLines.join("\n"), L, doc.y, { width: CW, lineGap: 1.5 });
+        doc.fillColor(NAVY).font("Times-Bold").fontSize(10.5).text("To:", L, doc.y); doc.moveDown(0.2);
+        doc.fillColor(INK).font("Times-Roman").fontSize(10.5).text(model.toLines.join("\n"), L, doc.y, { width: CW, lineGap: 1.5 });
         doc.moveDown(0.8);
       }
       if (model.re) para(model.re, { gap: 12 });
@@ -197,7 +198,7 @@ function buildLetterPdf(model, site, dateStr, logo) {
       function drawWatermark() {
         doc.save();
         doc.rotate(-45, { origin: [W / 2, H / 2] });
-        doc.font("Helvetica-Bold").fontSize(130).fillColor("#9aa0a6").fillOpacity(0.13);
+        doc.font("Times-Bold").fontSize(130).fillColor("#9aa0a6").fillOpacity(0.13);
         var tw = doc.widthOfString("DRAFT");
         doc.text("DRAFT", W / 2 - tw / 2, H / 2 - 70, { lineBreak: false });
         doc.fillOpacity(1).restore();
@@ -212,37 +213,37 @@ function buildLetterPdf(model, site, dateStr, logo) {
 function signature(doc, sg, NAVY, INK, MUTE, L, CW) {
   const R = L + CW, LINE = "#555";
   if (doc.y + 150 > doc.page.height - doc.page.margins.bottom) doc.addPage();
-  doc.fillColor(INK).font("Helvetica").fontSize(10.5).text("Yours very truly,", L, doc.y); doc.moveDown(0.3);
-  doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(11).text("King EPCM", L, doc.y);
+  doc.fillColor(INK).font("Times-Roman").fontSize(10.5).text("Yours very truly,", L, doc.y); doc.moveDown(0.3);
+  doc.fillColor(NAVY).font("Times-Bold").fontSize(11).text("King EPCM", L, doc.y);
   doc.moveDown(2.8);
   const y = doc.y, sigW = CW * 0.50, gap = CW * 0.08, dateX = L + sigW + gap;
   doc.moveTo(L, y).lineTo(L + sigW, y).lineWidth(0.9).strokeColor(LINE).stroke();
   doc.moveTo(dateX, y).lineTo(R, y).lineWidth(0.9).strokeColor(LINE).stroke();
-  doc.fillColor(MUTE).font("Helvetica").fontSize(8).text("Date", dateX, y + 4, { width: R - dateX });
+  doc.fillColor(MUTE).font("Times-Roman").fontSize(8).text("Date", dateX, y + 4, { width: R - dateX });
   doc.y = y + 12;
-  doc.fillColor(INK).font("Helvetica-Bold").fontSize(11).text(sg.name, L, doc.y);
-  if (sg.title) doc.fillColor(INK).font("Helvetica").fontSize(10).text(sg.title, L, doc.y);
-  doc.fillColor(INK).font("Helvetica").fontSize(10).text("King EPCM", L, doc.y);
+  doc.fillColor(INK).font("Times-Bold").fontSize(11).text(sg.name, L, doc.y);
+  if (sg.title) doc.fillColor(INK).font("Times-Roman").fontSize(10).text(sg.title, L, doc.y);
+  doc.fillColor(INK).font("Times-Roman").fontSize(10).text("King EPCM", L, doc.y);
   var lines = [];
   if (sg.phone) lines.push("Tel:     " + sg.phone);
   if (sg.email) lines.push("Email:  " + sg.email);
-  if (lines.length) { doc.moveDown(0.35); doc.fillColor(MUTE).font("Helvetica").fontSize(9.5).text(lines.join("\n"), L, doc.y, { width: CW, lineGap: 3.5 }); }
+  if (lines.length) { doc.moveDown(0.35); doc.fillColor(MUTE).font("Times-Roman").fontSize(9.5).text(lines.join("\n"), L, doc.y, { width: CW, lineGap: 3.5 }); }
 }
 function municipalSignature(doc, client, NAVY, INK, MUTE, L, CW) {
   const R = L + CW, LINE = "#555";
   function ensureSpace(h) { if (doc.y + h > doc.page.height - doc.page.margins.bottom) doc.addPage(); }
   doc.moveDown(0.6);
-  doc.fillColor(INK).font("Helvetica").fontSize(10.5).text("IN WITNESS WHEREOF the parties have executed this Reliance Agreement as of the date written below.", L, doc.y, { width: CW, lineGap: 2 });
+  doc.fillColor(INK).font("Times-Roman").fontSize(10.5).text("IN WITNESS WHEREOF the parties have executed this Reliance Agreement as of the date written below.", L, doc.y, { width: CW, lineGap: 2 });
   doc.moveDown(1.4);
   function sigDateBlock(caption) {
     ensureSpace(72);
-    doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(10).text(caption, L, doc.y, { width: CW });
+    doc.fillColor(NAVY).font("Times-Bold").fontSize(10).text(caption, L, doc.y, { width: CW });
     doc.moveDown(2.0);
     const y = doc.y, sigW = CW * 0.56, gap = CW * 0.08, dateX = L + sigW + gap;
     doc.moveTo(L, y).lineTo(L + sigW, y).lineWidth(0.9).strokeColor(LINE).stroke();
     doc.moveTo(dateX, y).lineTo(R, y).lineWidth(0.9).strokeColor(LINE).stroke();
-    doc.fillColor(MUTE).font("Helvetica").fontSize(8).text("Signature", L, y + 4, { width: sigW });
-    doc.fillColor(MUTE).font("Helvetica").fontSize(8).text("Date", dateX, y + 4, { width: R - dateX });
+    doc.fillColor(MUTE).font("Times-Roman").fontSize(8).text("Signature", L, y + 4, { width: sigW });
+    doc.fillColor(MUTE).font("Times-Roman").fontSize(8).text("Date", dateX, y + 4, { width: R - dateX });
     doc.y = y + 24;
     doc.moveDown(1.1);
   }
@@ -250,15 +251,15 @@ function municipalSignature(doc, client, NAVY, INK, MUTE, L, CW) {
   sigDateBlock("Signed by the person authorized to bind the Consulting Firm (King EPCM)");
   doc.moveDown(0.2);
   ensureSpace(54);
-  doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(11).text("Property Owner, or Authorized Officer", L, doc.y, { width: CW });
+  doc.fillColor(NAVY).font("Times-Bold").fontSize(11).text("Property Owner, or Authorized Officer", L, doc.y, { width: CW });
   const ry = doc.y + 4;
   doc.moveTo(L, ry).lineTo(R, ry).lineWidth(0.8).strokeColor(LINE).stroke();
   doc.y = ry + 12;
   function fieldRow(label, value) {
     ensureSpace(30);
     const y = doc.y, labW = CW * 0.34, lineX = L + labW;
-    if (label) doc.fillColor(INK).font("Helvetica").fontSize(10).text(label, L, y + 1, { width: labW - 8 });
-    if (value) doc.fillColor(INK).font("Helvetica-Bold").fontSize(10).text(value, lineX, y + 1, { width: R - lineX });
+    if (label) doc.fillColor(INK).font("Times-Roman").fontSize(10).text(label, L, y + 1, { width: labW - 8 });
+    if (value) doc.fillColor(INK).font("Times-Bold").fontSize(10).text(value, lineX, y + 1, { width: R - lineX });
     else { const ly = y + 12; doc.moveTo(lineX, ly).lineTo(R, ly).lineWidth(0.8).strokeColor(LINE).stroke(); }
     doc.y = y + 26;
   }
@@ -283,7 +284,7 @@ function buildLetterDocx(model, site, dateStr, logo) {
   // Paragraph. opts: bold, color, sz(half-pts), align, after(twips)
   function P(text, opts) {
     opts = opts || {};
-    const rpr = '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>' + (opts.bold ? '<w:b/>' : '') + (opts.color ? '<w:color w:val="' + opts.color + '"/>' : '') + '<w:sz w:val="' + (opts.sz || 21) + '"/></w:rPr>';
+    const rpr = '<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>' + (opts.bold ? '<w:b/>' : '') + (opts.color ? '<w:color w:val="' + opts.color + '"/>' : '') + '<w:sz w:val="' + (opts.sz || 21) + '"/></w:rPr>';
     const ppr = '<w:pPr><w:spacing w:after="' + (opts.after == null ? 180 : opts.after) + '" w:line="259" w:lineRule="auto"/>' + (opts.align ? '<w:jc w:val="' + opts.align + '"/>' : '') + '</w:pPr>';
     const t = String(text == null ? "" : text);
     if (t === "") return '<w:p>' + ppr + '</w:p>';
@@ -370,7 +371,7 @@ function buildLetterDocx(model, site, dateStr, logo) {
   const logoCy = logo ? Math.max(180000, Math.round(logoCx * png.h / png.w)) : 520000;
   const logoRun = logo
     ? '<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="' + logoCx + '" cy="' + logoCy + '"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="11" name="logo"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="11" name="logo"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + logoCx + '" cy="' + logoCy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>'
-    : '<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:b/><w:color w:val="' + GOLD + '"/><w:sz w:val="40"/></w:rPr><w:t>KING EPCM</w:t></w:r>';
+    : '<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:color w:val="' + GOLD + '"/><w:sz w:val="40"/></w:rPr><w:t>KING EPCM</w:t></w:r>';
   const hdrLeftW = 4600, hdrRightW = CONTENT_W - hdrLeftW;
   const headerTbl = '<w:tbl><w:tblPr><w:tblW w:w="' + CONTENT_W + '" w:type="dxa"/>' + noTblBorders + '<w:tblLayout w:type="fixed"/></w:tblPr>'
     + '<w:tblGrid><w:gridCol w:w="' + hdrLeftW + '"/><w:gridCol w:w="' + hdrRightW + '"/></w:tblGrid><w:tr>'
@@ -387,8 +388,9 @@ function buildLetterDocx(model, site, dateStr, logo) {
     + '</w:hdr>';
   const footerXml = xmlDecl()
     + '<w:ftr ' + nsAttrs() + '>'
-    + '<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="8" w:space="1" w:color="' + GOLD + '"/></w:pBdr><w:jc w:val="center"/><w:spacing w:after="0"/></w:pPr>'
-    + '<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:color w:val="' + MUTE + '"/><w:sz w:val="15"/></w:rPr>'
+    + '<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="22" w:space="1" w:color="' + GOLD + '"/><w:bottom w:val="single" w:sz="6" w:space="1" w:color="' + NAVY + '"/></w:pBdr><w:spacing w:after="0" w:line="40" w:lineRule="exact"/></w:pPr></w:p>'
+    + '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="90" w:after="0"/></w:pPr>'
+    + '<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:color w:val="' + MUTE + '"/><w:sz w:val="15"/></w:rPr>'
     + '<w:t xml:space="preserve">King EPCM   ·   3780 14th Avenue, Unit 211, Markham, ON  L3R 9Y5   ·   416-342-3001   ·   KingEPCM.com</w:t></w:r></w:p>'
     + '</w:ftr>';
 

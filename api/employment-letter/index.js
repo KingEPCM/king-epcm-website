@@ -21,6 +21,7 @@ const SITE_PATH = process.env.REVIEW_SITE_PATH;
 const BASE_PATH = process.env.REVIEW_BASE_PATH;
 const LIBRARY = process.env.REVIEW_LIBRARY || "";
 const SUBFOLDER = process.env.EMPLOYMENT_LETTER_SUBFOLDER || ""; // blank = staff folder root
+const { buildSimpleLetterDocx } = require("../_shared/letterDocx");
 let _driveId;
 
 module.exports = async function (context, req) {
@@ -33,9 +34,12 @@ module.exports = async function (context, req) {
   const name = (b.name || "").trim();
   if (!name) { context.res = json(400, { ok: false, error: "Employee name is required" }); return; }
 
-  const pdf = await buildLetter(b, loadLogo());
-
-  const out = { ok: true, filename: sanitize("Employment Letter - " + name + " - " + shortToday()) + ".pdf", pdfBase64: pdf.toString("base64"), filed: false, filedTo: null, notes: [] };
+  const logo = loadLogo();
+  const model = letterModel(b);
+  const pdf = await buildPdf(model, logo);
+  const docx = buildSimpleLetterDocx({ docTitle: model.docTitle, name: model.name, dateStr: ordinalDate(new Date()), salutation: model.salutation, paragraphs: model.paragraphs, closing: model.closing, signer: model.signer, logo: logo });
+  const base = sanitize("Employment Letter - " + name + " - " + shortToday());
+  const out = { ok: true, filename: base + ".pdf", pdfBase64: pdf.toString("base64"), docxFilename: base + ".docx", docxBase64: docx.toString("base64"), filed: false, filedTo: null, notes: [] };
 
   // Best-effort: file a dated copy into the staff member's HR folder (name match).
   if (CLIENT_ID && CLIENT_SECRET && SITE_PATH && BASE_PATH) {
@@ -49,8 +53,7 @@ module.exports = async function (context, req) {
           const sub = await ensureSubfolder(token, driveId, folderPath, SUBFOLDER).catch(function () { return null; });
           if (sub) folderPath += "/" + sub;
         }
-        const filedName = sanitize("Employment Letter - " + name + " - " + shortToday()) + ".pdf";
-        await uploadPdf(token, driveId, folderPath + "/" + filedName, pdf);
+        await uploadPdf(token, driveId, folderPath + "/" + base + ".pdf", pdf);
         out.filed = true; out.filedTo = staff + (SUBFOLDER ? " / " + SUBFOLDER : "");
       } else out.notes.push("no folder match");
     } catch (e) { context.log.error(e); out.notes.push("file failed"); }
@@ -70,9 +73,47 @@ function loadLogo() {
   catch (e) { return null; }
 }
 
-// Mirrors the official King EPCM letterhead: white header with the gold logo + tagline,
-// a gold rule, a running header top-right, RE block, signed block, and a centered footer.
-function buildLetter(b, logo) {
+// Build the letter content once; both the PDF and the Word renderer consume this model.
+function letterModel(b) {
+  const name = (b.name || "").trim(), fn = firstName(name);
+  const position = (b.position || "").trim(), etype = (b.employmentType || "").trim();
+  const start = b.startDate ? ordinalDate(parseDate(b.startDate)) : "";
+  const dob = b.dateOfBirth ? isoDate(b.dateOfBirth) : "";
+  const pay = payPhrase(b.salaryAmount, b.salaryBasis);
+  const ohip = !!b.ohip, addr = (b.employeeAddress || "").trim();
+  const paras = [];
+  if (ohip) {
+    let p1 = "This letter confirms that " + name + (dob ? " (date of birth: " + dob + ")" : "") + " is employed with King EPCM on a full-time basis" + (position ? " in the position of " + position : "") + ".";
+    if (start) p1 += " " + fn + " has been employed with King EPCM since " + start + ".";
+    paras.push({ text: p1 });
+    paras.push({ text: "King EPCM intends to employ " + fn + " on a full-time basis for a minimum of six (6) months." });
+    if (pay) paras.push({ text: name + "'s current " + pay + "." });
+    if (addr) paras.push({ text: fn + "'s residential address is " + addr + "." });
+    paras.push({ text: "This letter is provided to confirm employment, including for the purpose of Ontario Health Insurance Plan (OHIP) eligibility. Should you have any questions or inquiries regarding this information, please feel free to contact the undersigned at any time." });
+  } else {
+    let p1 = "This letter confirms that " + name + (dob ? " (date of birth: " + dob + ")" : "") + " is employed with King EPCM";
+    if (position) p1 += " in the position of " + position;
+    if (etype) p1 += " on a " + etype.toLowerCase() + " basis";
+    p1 += ".";
+    if (start) p1 += " " + fn + " has been employed with King EPCM since " + start + ".";
+    paras.push({ text: p1 });
+    if (pay) paras.push({ text: name + "'s current " + pay + "." });
+    paras.push({ text: "Should you have any questions or inquiries regarding this information, please feel free to contact the undersigned at any time." });
+  }
+  return {
+    docTitle: "Employment Confirmation Letter", name: name,
+    salutation: "To whom it may concern,", closing: "Regards,", paragraphs: paras,
+    signer: {
+      name: (b.signedByName || "").trim() || "Angela Shi",
+      title: (b.signedByTitle || "").trim() || "Operation Manager",
+      phone: (b.signedByPhone || "").trim() || "416-342-3001 x109",
+      email: (b.signedByEmail || "").trim() || "AShi@KingEPCM.com"
+    }
+  };
+}
+
+// Render the model to a branded PDF (King EPCM letterhead, gold rule, navy footer).
+function buildPdf(model, logo) {
   return new Promise(function (resolve, reject) {
     try {
       const PDFDocument = require("pdfkit");
@@ -81,82 +122,41 @@ function buildLetter(b, logo) {
       doc.on("data", function (d) { chunks.push(d); });
       doc.on("end", function () { resolve(Buffer.concat(chunks)); });
 
-      const NAVY = "#14294D", GOLD = "#E5A823", INK = "#222", MUTE = "#555", GREY = "#666";
+      const NAVY = "#14294D", GOLD = "#E5A823", INK = "#222", GREY = "#666";
       const W = doc.page.width, H = doc.page.height, L = 64, R = W - 64, CW = R - L;
-      const TITLE = "Employment Confirmation Letter";
-      const name = (b.name || "").trim();
+      const title = model.docTitle, name = model.name;
 
-      // ---- Letterhead ----
       let drew = false;
       if (logo) { try { doc.image(logo, L, 44, { width: 165 }); drew = true; } catch (e) {} }
       if (!drew) {
-        doc.fillColor(GOLD).font("Helvetica-Bold").fontSize(26).text("KING EPCM", L, 44);
-        doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(8).text("Flexible. Dependable. On-site Engineering.", L, 80);
+        doc.fillColor(GOLD).font("Times-Bold").fontSize(26).text("KING EPCM", L, 44);
+        doc.fillColor(NAVY).font("Times-Bold").fontSize(8).text("Flexible. Dependable. On-site Engineering.", L, 80);
       }
-      doc.fillColor(NAVY).font("Times-Roman").fontSize(10).text(TITLE, L, 61, { width: CW, align: "right" });
+      doc.fillColor(NAVY).font("Times-Roman").fontSize(10).text(title, L, 61, { width: CW, align: "right" });
       if (name) doc.fillColor(GREY).text(name, L, 75, { width: CW, align: "right" });
-      // Combined gold + thin navy rule under the header (formal, with the King EPCM blue).
       doc.moveTo(L, 120).lineTo(R, 120).lineWidth(2.5).strokeColor(GOLD).stroke();
       doc.moveTo(L, 124.5).lineTo(R, 124.5).lineWidth(0.8).strokeColor(NAVY).stroke();
 
-      // ---- Date ----
       doc.fillColor(INK).font("Times-Roman").fontSize(12).text(ordinalDate(new Date()), L, 144);
       doc.moveDown(1);
-
-      // ---- RE block ----
-      doc.font("Times-Bold").fontSize(12).fillColor(INK).text("RE:    " + TITLE, L);
+      doc.font("Times-Bold").fontSize(12).fillColor(INK).text("RE:    " + title, L);
       if (name) doc.text("          " + name, L);
       doc.moveDown(0.8);
+      doc.font("Times-Roman").fontSize(12).fillColor(INK).text(model.salutation, { paragraphGap: 12 });
 
-      // ---- Salutation + body (formal serif, 12pt) ----
-      doc.font("Times-Roman").fontSize(12).fillColor(INK).text("To whom it may concern,", { paragraphGap: 12 });
+      model.paragraphs.forEach(function (p) {
+        doc.font(p.bold ? "Times-Bold" : "Times-Roman").fontSize(12).fillColor(INK)
+          .text(p.text, L + (p.indent ? 24 : 0), doc.y, { width: CW - (p.indent ? 24 : 0), paragraphGap: 12, lineGap: 3 });
+      });
 
-      const position = (b.position || "").trim();
-      const etype = (b.employmentType || "").trim();
-      const start = b.startDate ? ordinalDate(parseDate(b.startDate)) : "";
-      const dob = b.dateOfBirth ? isoDate(b.dateOfBirth) : "";
-      const pay = payPhrase(b.salaryAmount, b.salaryBasis);
-      const ohip = !!b.ohip;
-      const addr = (b.employeeAddress || "").trim();
-      const fn = firstName(name);
-
-      if (ohip) {
-        // OHIP / ServiceOntario wording: explicit full-time, position, start date, and the
-        // mandatory six-month employment-intent statement (plus address for proof of residency).
-        let p1 = "This letter confirms that " + name + (dob ? " (date of birth: " + dob + ")" : "") + " is employed with King EPCM on a full-time basis" + (position ? " in the position of " + position : "") + ".";
-        if (start) p1 += " " + fn + " has been employed with King EPCM since " + start + ".";
-        doc.text(p1, { paragraphGap: 12, lineGap: 3 });
-        doc.text("King EPCM intends to employ " + fn + " on a full-time basis for a minimum of six (6) months.", { paragraphGap: 12, lineGap: 3 });
-        if (pay) doc.text(name + "'s current " + pay + ".", { paragraphGap: 12, lineGap: 3 });
-        if (addr) doc.text(fn + "'s residential address is " + addr + ".", { paragraphGap: 12, lineGap: 3 });
-        doc.text("This letter is provided to confirm employment, including for the purpose of Ontario Health Insurance Plan (OHIP) eligibility. Should you have any questions or inquiries regarding this information, please feel free to contact the undersigned at any time.", { paragraphGap: 30, lineGap: 3 });
-      } else {
-        let p1 = "This letter confirms that " + name + (dob ? " (date of birth: " + dob + ")" : "") + " is employed with King EPCM";
-        if (position) p1 += " in the position of " + position;
-        if (etype) p1 += " on a " + etype.toLowerCase() + " basis";
-        p1 += ".";
-        if (start) p1 += " " + fn + " has been employed with King EPCM since " + start + ".";
-        doc.text(p1, { paragraphGap: 12, lineGap: 3 });
-
-        if (pay) doc.text(name + "'s current " + pay + ".", { paragraphGap: 12, lineGap: 3 });
-
-        doc.text("Should you have any questions or inquiries regarding this information, please feel free to contact the undersigned at any time.", { paragraphGap: 30, lineGap: 3 });
-      }
-
-      // ---- Signed block (leaves room above the name for a signature) ----
-      doc.text("Regards,");
+      doc.font("Times-Roman").fontSize(12).fillColor(INK).text(model.closing || "Sincerely,", L, doc.y);
       doc.moveDown(3.2);
-      const sName = (b.signedByName || "").trim() || "Angela Shi";
-      const sTitle = (b.signedByTitle || "").trim() || "Operation Manager";
-      const sPhone = (b.signedByPhone || "").trim() || "416-342-3001 x109";
-      const sEmail = (b.signedByEmail || "").trim() || "AShi@KingEPCM.com";
-      doc.font("Times-Roman").fontSize(12).fillColor(INK).text(sName, L);
-      doc.font("Times-Italic").fontSize(12).text(sTitle, L);
-      doc.font("Times-Roman").fontSize(12).text("T: " + sPhone, L);
-      doc.text("E: " + sEmail, L);
+      const sg = model.signer || {};
+      doc.font("Times-Roman").fontSize(12).fillColor(INK).text(sg.name, L);
+      if (sg.title) doc.font("Times-Italic").fontSize(12).text(sg.title, L);
+      doc.font("Times-Roman").fontSize(12).text("T: " + sg.phone, L);
+      doc.text("E: " + sg.email, L);
 
-      // ---- Navy footer band (drawn last). Zero the bottom margin first so placing text
-      // in the bottom strip doesn't make pdfkit spill onto extra pages. ----
       doc.page.margins.bottom = 0;
       var bandH = 46;
       doc.rect(0, H - bandH, W, bandH).fill(NAVY);
