@@ -43,10 +43,26 @@
     { "route": "/mining-aggregate", "rewrite": "/mining-aggregate.html" },
 
     { "route": "/project-onboarding.html", "redirect": "/project-onboarding", "statusCode": 301 },
-    { "route": "/project-onboarding", "rewrite": "/project-onboarding.html" }
+    { "route": "/project-onboarding", "rewrite": "/project-onboarding.html" },
+
+    { "route": "/geotechnical", "redirect": "/geotechnical-hydrogeology", "statusCode": 301 },
+    { "route": "/hydrogeology", "redirect": "/geotechnical-hydrogeology", "statusCode": 301 },
+    { "route": "/environmental", "redirect": "/chemical-environmental", "statusCode": 301 },
+    { "route": "/chemical", "redirect": "/chemical-environmental", "statusCode": 301 },
+    { "route": "/natural-heritage", "redirect": "/natural-heritage-environmental", "statusCode": 301 },
+    { "route": "/civil", "redirect": "/civil-municipal-design", "statusCode": 301 },
+    { "route": "/municipal", "redirect": "/civil-municipal-design", "statusCode": 301 },
+    { "route": "/survey", "redirect": "/survey-inspections", "statusCode": 301 },
+    { "route": "/inspections", "redirect": "/survey-inspections", "statusCode": 301 },
+    { "route": "/permit", "redirect": "/permit-project-management", "statusCode": 301 },
+    { "route": "/project-management", "redirect": "/permit-project-management", "statusCode": 301 },
+    { "route": "/mining", "redirect": "/mining-aggregate", "statusCode": 301 },
+    { "route": "/aggregate", "redirect": "/mining-aggregate", "statusCode": 301 },
+    { "route": "/services-1", "redirect": "/services", "statusCode": 301 },
+    { "route": "/home", "redirect": "/", "statusCode": 301 }
   ],
   "responseOverrides": {
-    "404": { "rewrite": "/index.html", "statusCode": 404 }
+    "404": { "rewrite": "/404.html", "statusCode": 404 }
   },
   "mimeTypes": {
     ".json": "application/json"
